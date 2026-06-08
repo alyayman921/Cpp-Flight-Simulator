@@ -11,7 +11,7 @@ typedef struct{
   float G,Yb,Yv,LB ,NB, LP , NP, LR,L_DR , NR, L_DA,N_DA, N_DR,Yda,Ydr;
   float Lv, Nv;
   float SD_Long_temp[16];
-  float SD_Lat_temp[14];
+  float SD_Lat_dash[14];
   Eigen::Vector3f V;
   Eigen::Vector3f mg0;
   Eigen::VectorXf time_vector;
@@ -19,7 +19,7 @@ typedef struct{
   Eigen::Matrix<float, 6, 7> SD;
   Eigen::Matrix<float, 10, 10> T;
   Eigen::Matrix<float, 10, 1> lat_dash;
-  Eigen::Matrix<float, 10, 1> Lat_temp;
+  Eigen::Matrix<float, 10, 1> Lat_dash;
   Eigen::Matrix<float, 14, 1> SD_Lat;
 }aircraft_data;
 
@@ -54,23 +54,15 @@ aircraft_data sorting(raw_data raw){
   
   // Lat Stability Derivatives
   for(int i=38;i<52;i++){
-    d.SD_Lat_temp[i-38] = raw.B[i];
+    d.SD_Lat_dash[i-38] = raw.B[i];
   }
   d.Yda=raw.B[46];d.Ydr=raw.B[47];
   d.G=1/(1-(pow(d.Inertia_temp[3],2)/(d.Inertia_temp[0]*d.Inertia_temp[2])));
-  d.Yv = d.SD_Lat_temp[0];d.Yb = d.SD_Lat_temp[1];d.LB = d.SD_Lat_temp[2];
-  d.NB = d.SD_Lat_temp[3];d.LP = d.SD_Lat_temp[4];d.NP = d.SD_Lat_temp[5];
-  d.LR = d.SD_Lat_temp[6];d.NR = d.SD_Lat_temp[7];d.L_DA = d.SD_Lat_temp[10];
-  d.N_DA = d.SD_Lat_temp[11];d.L_DR = d.SD_Lat_temp[12];d.N_DR = d.SD_Lat_temp[13];
-  d.Lv=d.LB/d.Vtotal;d.Nv=d.NB/d.Vtotal;
+  d.Yv = d.SD_Lat_dash[0];d.Yb = d.SD_Lat_dash[1];d.LB = d.SD_Lat_dash[2];
+  d.NB = d.SD_Lat_dash[3];d.LP = d.SD_Lat_dash[4];d.NP = d.SD_Lat_dash[5];
+  d.LR = d.SD_Lat_dash[6];d.NR = d.SD_Lat_dash[7];d.L_DA = d.SD_Lat_dash[10];
+  d.N_DA = d.SD_Lat_dash[11];d.L_DR = d.SD_Lat_dash[12];d.N_DR = d.SD_Lat_dash[13];
 
-  // SD Matrix Construction
-  d.SD << d.Xu, 0,    d.Xw, 0,    0, 0, 0,
-        0,    d.Yv, 0,    0,    0, 0, 0,
-        d.Zu, 0,    d.Zw, 0,    d.Zq, 0, d.Zwd,
-        0,    d.Lv, 0,    d.LP, 0, d.LR, 0,
-        d.Mu, 0,    d.Mw, 0,    d.Mq, 0, d.Mwd,
-        0,    d.Nv, 0,    d.NP, 0, d.NR, 0;
 
   d.lat_dash << d.LB, d.NB, d.LP, d.NP, d.LR, d.NR, d.L_DA, d.N_DA, d.L_DR, d.N_DR;
   
@@ -85,20 +77,34 @@ aircraft_data sorting(raw_data raw){
        0,  0,0, 0, 0, 0, 0, 0, d.G, d.G * d.Inertia_temp[3] / d.Inertia_temp[0],
        0,  0,0, 0, 0, 0, 0, 0, d.G * d.Inertia_temp[3] / d.Inertia_temp[2], d.G;
   // lat temp = T dash-1
-  d.Lat_temp=d.T.lu().solve(d.lat_dash);
-  d.SD_Lat << d.Yv, 
-              d.Yb, //SD_Lat final in matlab, remove this value for a 13x1 vector
-              d.Lat_temp[0],
-              d.Lat_temp[1],
-              d.Lat_temp[2],
-              d.Lat_temp[3],
-              d.Lat_temp[4],
-              d.Lat_temp[5],
+  d.Lat_dash=d.T.lu().solve(d.lat_dash);
+  d.SD_Lat << d.Yv,
+              d.Yb, // 1
+              d.Lat_dash[0],//LB_dash 2
+              d.Lat_dash[1],//NB_dash 3
+              d.Lat_dash[2],//LP_dash 4 
+              d.Lat_dash[3],//NP_dash 5 
+              d.Lat_dash[4],//LR_dash 6
+              d.Lat_dash[5],//NR_dash 7
               d.Yda,
               d.Ydr,
-              d.Lat_temp[6],
-              d.Lat_temp[7],
-              d.Lat_temp[8],
-              d.Lat_temp[9];
+              d.Lat_dash[6],//L_DA_dash 10
+              d.Lat_dash[7],//N_DA_dash 11
+              d.Lat_dash[8],//L_DR_dash 12 
+              d.Lat_dash[9];//N_DR_dash 13
+
+  d.Lv=d.SD_Lat[2]/d.Vtotal;d.Nv=d.SD_Lat[3]/d.Vtotal;
+  d.Yv = d.SD_Lat[0];d.Yb = d.SD_Lat[1];d.LB = d.SD_Lat[2];
+  d.NB = d.SD_Lat[3];d.LP = d.SD_Lat[4];d.NP = d.SD_Lat[5];
+  d.LR = d.SD_Lat[6];d.NR = d.SD_Lat[7];d.L_DA = d.SD_Lat[10];
+  d.N_DA = d.SD_Lat[11];d.L_DR = d.SD_Lat[12];d.N_DR = d.SD_Lat[13];
+
+  // SD Matrix Construction
+  d.SD << d.Xu, 0,    d.Xw, 0,    0, 0, 0,
+        0,    d.Yv, 0,    0,    0, 0, 0,
+        d.Zu, 0,    d.Zw, 0,    d.Zq, 0, d.Zwd,
+        0,    d.Lv, 0,    d.LP, 0, d.LR, 0,
+        d.Mu, 0,    d.Mw, 0,    d.Mq, 0, d.Mwd,
+        0,    d.Nv, 0,    d.NP, 0, d.NR, 0;
 return d;
 }
