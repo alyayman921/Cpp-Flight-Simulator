@@ -27,7 +27,7 @@ raw_data readxlsx(const char *filename) {
     xlsxioreadersheet sheet;
     char *cell_value;
 
-    printf("Opening file: %s\n", filename);
+    //printf("Opening file: %s\n", filename);
     xlsxioread = xlsxioread_open(filename);
     if (xlsxioread == NULL) {
         fprintf(stderr, "Error: Could not open '%s'\n", filename);
@@ -62,7 +62,7 @@ raw_data readxlsx(const char *filename) {
             //printf("Row %d: (empty row)\n", row_count);
         }
     }
-    printf("Read Successful\n");
+    //printf("Read Successful\n");
 
     /* Cleanup */
     xlsxioread_sheet_close(sheet);

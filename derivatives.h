@@ -5,16 +5,17 @@
 
 typedef struct{
   float Inertia_temp[4];
-  int N_steps;
-  float dt, tfinal,Vtotal,theta0,z0,m,g;
+  float Vtotal,theta0,z0,m,g;
   float Xu,Zu,Mu,Xw,Zw,Mw,Zwd,Zq,Mwd,Mq,Xde,Zde,Mde,Xdth,Zdth,Mdth;
   float G,Yb,Yv,LB ,NB, LP , NP, LR,L_DR , NR, L_DA,N_DA, N_DR,Yda,Ydr;
   float Lv, Nv;
   float SD_Long_temp[16];
   float SD_Lat_dash[14];
-  Eigen::Vector3f V;
+  Eigen::Vector3f V0;
   Eigen::Vector3f mg0;
   Eigen::VectorXf time_vector;
+  Eigen::Matrix<float,3,1> omega0; 
+  Eigen::Matrix<float,3,1> euler0;
   Eigen::Matrix<float,3,3> Inertia;
   Eigen::Matrix<float, 6, 7> SD;
   Eigen::Matrix<float, 6, 4> CD;
@@ -28,16 +29,21 @@ aircraft_data sorting(raw_data raw){
   aircraft_data d;
   // States Node
   for(int i=5;i<8;i++){
-    d.V[i-5]=raw.B[i];
+    d.V0[i-5]=raw.B[i];
   }
-  d.Vtotal=sqrt(pow(d.V[0],2)+pow(d.V[1],2)+pow(d.V[2],2));
+  d.Vtotal=sqrt(pow(d.V0[0],2)+pow(d.V0[1],2)+pow(d.V0[2],2));
   d.theta0=raw.B[12]; // rad 
   d.m=raw.B[52];
   d.g=raw.B[53];
   d.mg0 << sin(d.theta0) , 0 , -cos(d.theta0);
   d.mg0=d.m*d.g *d.mg0;
   d.z0=raw.B[16];
-
+  for (int i=8;i<11;i++){
+    d.omega0[i-8]=raw.B[i];
+  }
+  for (int i=11;i<14;i++){
+    d.euler0[i-11]=raw.B[i];
+  }
   for(int i=54;i<58;i++){   // ixx iyy izz ixz
   d.Inertia_temp[i-54] = raw.B[i]; 
   }
