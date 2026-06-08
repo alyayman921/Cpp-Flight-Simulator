@@ -17,6 +17,7 @@ typedef struct{
   Eigen::VectorXf time_vector;
   Eigen::Matrix<float,3,3> Inertia;
   Eigen::Matrix<float, 6, 7> SD;
+  Eigen::Matrix<float, 6, 4> CD;
   Eigen::Matrix<float, 10, 10> T;
   Eigen::Matrix<float, 10, 1> lat_dash;
   Eigen::Matrix<float, 10, 1> Lat_dash;
@@ -56,14 +57,13 @@ aircraft_data sorting(raw_data raw){
   for(int i=38;i<52;i++){
     d.SD_Lat_dash[i-38] = raw.B[i];
   }
+  // rbna m3ak fe el cleanup
   d.Yda=raw.B[46];d.Ydr=raw.B[47];
   d.G=1/(1-(pow(d.Inertia_temp[3],2)/(d.Inertia_temp[0]*d.Inertia_temp[2])));
   d.Yv = d.SD_Lat_dash[0];d.Yb = d.SD_Lat_dash[1];d.LB = d.SD_Lat_dash[2];
   d.NB = d.SD_Lat_dash[3];d.LP = d.SD_Lat_dash[4];d.NP = d.SD_Lat_dash[5];
   d.LR = d.SD_Lat_dash[6];d.NR = d.SD_Lat_dash[7];d.L_DA = d.SD_Lat_dash[10];
   d.N_DA = d.SD_Lat_dash[11];d.L_DR = d.SD_Lat_dash[12];d.N_DR = d.SD_Lat_dash[13];
-
-
   d.lat_dash << d.LB, d.NB, d.LP, d.NP, d.LR, d.NR, d.L_DA, d.N_DA, d.L_DR, d.N_DR;
   
   d.T << d.G,d.G * d.Inertia_temp[3] / d.Inertia_temp[0], 0, 0, 0, 0, 0, 0, 0, 0,
@@ -106,5 +106,11 @@ aircraft_data sorting(raw_data raw){
         0,    d.Lv, 0,    d.LP, 0, d.LR, 0,
         d.Mu, 0,    d.Mw, 0,    d.Mq, 0, d.Mwd,
         0,    d.Nv, 0,    d.NP, 0, d.NR, 0;
+  d.CD << 0, d.Xde, d.Xdth, 0,
+          d.Yda, 0, 0 , d.Ydr,
+          0, d.Zde, d.Zdth,0,
+          d.L_DA, 0,0,d.L_DR,
+          0,d.Mde ,d.Mdth , 0,
+          d.N_DA, 0, 0, d.N_DR;
 return d;
 }

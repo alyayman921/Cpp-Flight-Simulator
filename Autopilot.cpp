@@ -11,6 +11,7 @@ raw_data raw=readxlsx(filename);
 aircraft_data c5a=sorting(raw);
 int i,j;
 std::cout<<c5a.SD<<'\n';
+std::cout<<c5a.CD<<'\n';
 while (false){
 
 }
