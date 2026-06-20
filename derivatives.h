@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 #include "Eigen/Core"
 #include "Eigen/Dense"
@@ -17,6 +19,7 @@ typedef struct{
   Eigen::Matrix<float,3,1> omega0; 
   Eigen::Matrix<float,3,1> euler0;
   Eigen::Matrix<float,3,3> Inertia;
+  Eigen::Matrix<float,9,1> states0;
   Eigen::Matrix<float, 6, 7> SD;
   Eigen::Matrix<float, 6, 4> CD;
   Eigen::Matrix<float, 10, 10> T;
@@ -25,11 +28,13 @@ typedef struct{
   Eigen::Matrix<float, 14, 1> SD_Lat;
 }aircraft_data;
 
-aircraft_data sorting(raw_data raw){
+inline aircraft_data sorting(raw_data raw){
   aircraft_data d;
   // States Node
   for(int i=5;i<8;i++){
     d.V0[i-5]=raw.B[i];
+    d.states0[i-5]=raw.B[i];
+
   }
   d.Vtotal=sqrt(pow(d.V0[0],2)+pow(d.V0[1],2)+pow(d.V0[2],2));
   d.theta0=raw.B[12]; // rad 
@@ -40,9 +45,11 @@ aircraft_data sorting(raw_data raw){
   d.z0=raw.B[16];
   for (int i=8;i<11;i++){
     d.omega0[i-8]=raw.B[i];
+    d.states0[i-8+3]=raw.B[i];
   }
   for (int i=11;i<14;i++){
     d.euler0[i-11]=raw.B[i];
+    d.states0[i-11+6]=raw.B[i];
   }
   for(int i=54;i<58;i++){   // ixx iyy izz ixz
   d.Inertia_temp[i-54] = raw.B[i]; 
