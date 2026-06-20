@@ -45,12 +45,15 @@ int main() {
     initial_state << c5a.V0(0), c5a.V0(1), c5a.V0(2),             // velocities
                       c5a.omega0(0), c5a.omega0(1), c5a.omega0(2), // angular velocities
                       c5a.euler0(0), c5a.euler0(1), c5a.euler0(2); // Euler angles
-
     // Setup and run RK4 integration
     rk4 rk4Solver(dt, tfinal);
-    Eigen::Matrix<float,9,1> check={2,1,0,0,0,0,0,0,0};
-    Eigen::Matrix<float, 9, 1>* results = rk4Solver.rk4_solver(RBD, check);
+    
+    // Verify
+    //Eigen::Matrix<float,9,1> check={2,1,0,0,0,0,0,0,0};
+    //Eigen::Matrix<float, 9, 1>* results = rk4Solver.rk4_solver(RBD, check); // must change rk4 to solve rbd.verify, const float dt = 0.2; const float tfinal = 20;
+    // results must be near 1.03608, 5.31897 at time 20
 
+    // Solve
     //Eigen::Matrix<float, 9, 1>* results = rk4Solver.rk4_solver(RBD, initial_state);
 
     int N_steps = (int)(tfinal / dt);

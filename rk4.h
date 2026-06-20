@@ -39,16 +39,16 @@ class rk4{
 
             for (int step = 0; step < N_steps; step++) {
                 // k1 = f(t, y)
-                k1 = RBDobj.Verify(y);
+                k1 = RBDobj.Equations(y);
 
                 // k2 = f(t + dt/2, y + dt*k1/2)
-                k2 = RBDobj.Verify(y + 0.5f * dt * k1);
+                k2 = RBDobj.Equations(y + 0.5f * dt * k1);
 
                 // k3 = f(t + dt/2, y + dt*k2/2)
-                k3 = RBDobj.Verify(y + 0.5f * dt * k2);
+                k3 = RBDobj.Equations(y + 0.5f * dt * k2);
 
                 // k4 = f(t + dt, y + dt*k3)
-                k4 = RBDobj.Verify(y + dt * k3);
+                k4 = RBDobj.Equations(y + dt * k3);
 
                 // y_{n+1} = y_n + dt/6*(k1 + 2k2 + 2k3 + k4)
                 y = y + dt * (k1 + 2.0f * k2 + 2.0f * k3 + k4) / 6.0f;
