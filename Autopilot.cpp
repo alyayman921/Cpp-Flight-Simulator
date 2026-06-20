@@ -8,10 +8,10 @@
 #include "rk4.h"
 
 const char filename[] = "meta/C5A.xlsx";
-float da = 0.0, de = 0, dth = 1000, dr = 0;  // Control inputs: aileron, elevator, throttle, rudder
+float da = 0.0, de = 0, dth = 0, dr = 0.01;  // Control inputs: aileron, elevator, throttle, rudder
 Eigen::Matrix<float, 4, 1> Controls;
-const float dt = 0.2;
-const float tfinal = 20;
+const float dt = 0.01;
+const float tfinal = 200;
 
 bool fileExists(const char* path) {
     struct stat buffer;
@@ -36,8 +36,6 @@ int main() {
     std::cout << "Trim Euler angles (euler0): " << c5a.euler0.transpose() << std::endl;
 
     RBDsolve RBD(c5a, Controls);
-    std::cout << "Fg0 : " << RBD.F_g0 << std::endl;
-    std::cout << "Fg : " << RBD.F_g << std::endl;
 
 
     // Initial state vector: [v(3), omega(3), euler(3)]
@@ -54,7 +52,7 @@ int main() {
     // results must be near 1.03608, 5.31897 at time 20
 
     // Solve
-    //Eigen::Matrix<float, 9, 1>* results = rk4Solver.rk4_solver(RBD, initial_state);
+    Eigen::Matrix<float, 9, 1>* results = rk4Solver.rk4_solver(RBD, initial_state);
 
     int N_steps = (int)(tfinal / dt);
 
@@ -81,7 +79,6 @@ int main() {
     if (!final_state.allFinite()) {
         std::cerr << "\nWarning: final state contains NaN/Inf - simulation diverged." << std::endl;
     }
-    std::cout << "Fg : " << RBD.F_g << std::endl;
 
     rk4Solver.free_results();
     return 0;

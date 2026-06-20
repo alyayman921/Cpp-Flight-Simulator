@@ -90,6 +90,7 @@ Eigen::Matrix<float,9,1> RBDsolve::Equations(Eigen::Matrix<float,9,1> states){
 
     // linear newton
     v_dot = delta_F / m - omega.cross(v);
+    w_dot_state = v_dot(2);
 
     // Angular Newton
     delta_omega_dot = delta_M - omega.cross(I * omega);
