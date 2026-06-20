@@ -1,15 +1,17 @@
+#pragma once
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <xlsxio_read.h>
 #include <math.h>
 
-char temp[21];
+inline char temp[21];
 
 typedef struct {
-  float B[65]; // From excel sheet 
+  float B[65];
 } raw_data;
 
-void handling(int row,char current_cell[],float floated[]){
+inline void handling(int row,char current_cell[],float floated[]){
     int i=0;
     while (current_cell[i]!='\0'){
         temp[i]=current_cell[i];
@@ -20,7 +22,7 @@ void handling(int row,char current_cell[],float floated[]){
 }
 
 
-raw_data readxlsx(const char *filename) {
+inline raw_data readxlsx(const char *filename) {
     raw_data data;
 
     xlsxioreader xlsxioread;
