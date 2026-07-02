@@ -40,7 +40,7 @@ inline aircraft_data sorting(raw_data raw){
   d.theta0=raw.B[12]; // rad 
   d.m=raw.B[52];
   d.g=raw.B[53];
-  d.mg0 << sin(d.theta0) , 0 , -cos(d.theta0);
+  d.mg0 << -sin(d.theta0) , 0 , cos(d.theta0);
   d.mg0=d.m*d.g *d.mg0;
   d.z0=raw.B[16];
   for (int i=8;i<11;i++){
