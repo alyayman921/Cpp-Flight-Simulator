@@ -4,7 +4,7 @@
 #include "Eigen/Core"
 #include "Eigen/Dense"
 #include "RBDEqns.h"
-#include "logger.h"  // Include the logger
+#include "logger.h"
 
 class rk4{
     private:
@@ -13,7 +13,7 @@ class rk4{
         float tfinal;
         int N_steps;
         float *time_v;
-        Eigen::Matrix<float,9,1> *state_history;
+        Eigen::Matrix<float,10,1> *state_history;
         
         // Loggers
         DataLogger stateLogger;
@@ -27,14 +27,13 @@ class rk4{
             this->tfinal = tfinal;
             this->N_steps = (int)(tfinal / dt);
             this->time_v = (float*)malloc(N_steps * sizeof(float));
-            this->state_history = (Eigen::Matrix<float,9,1>*)malloc((N_steps+1) * sizeof(Eigen::Matrix<float,9,1>));
+            this->state_history = (Eigen::Matrix<float,10,1>*)malloc((N_steps+1) * sizeof(Eigen::Matrix<float,10,1>));
             this->loggersInitialized = false;
 
             for (int i = 0; i < N_steps; i++) {
                 time_v[i] = i * dt;
             }
         }
-        
         ~rk4() {
             // Loggers will be closed automatically by their destructors
         }
@@ -70,9 +69,9 @@ class rk4{
             std::cout << "All loggers initialized successfully!" << std::endl;
         }
 
-        Eigen::Matrix<float,9,1>* rk4_solver(RBDsolve &RBDobj, Eigen::Matrix<float,9,1> states0){
-            Eigen::Matrix<float,9,1> y = states0;
-            Eigen::Matrix<float,9,1> k1, k2, k3, k4;
+        Eigen::Matrix<float,10,1>* rk4_solver(RBDsolve &RBDobj, Eigen::Matrix<float,10,1> states0){
+            Eigen::Matrix<float,10,1> y = states0;
+            Eigen::Matrix<float,10,1> k1, k2, k3, k4;
 
             // Initialize loggers
             initializeLoggers();

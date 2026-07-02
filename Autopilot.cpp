@@ -27,28 +27,28 @@ int main() {
 
     if (!readControlsFromFile("controls.txt", Controls)) {
         std::cerr << "Failed to read controls. Using defaults..." << std::endl;
-        Controls << 0.0, 0.0, 1000.0, 0.05;
-    }   
+        Controls << 0.0, 0.0, 1000.0, 0;
+    }
     std::cout << "Controls loaded: " << Controls.transpose() << std::endl;
 
     // Read aircraft data
     raw_data raw = readxlsx(filename);
     aircraft_data c5a = sorting(raw);
-
+    std::cout<<c5a.SD;
     RBDsolve RBD(c5a, Controls);
 
     // Initial state vector: [v(3), omega(3), euler(3)]
-    Eigen::Matrix<float, 9, 1> initial_state;
+    Eigen::Matrix<float, 10,1> initial_state;
     initial_state << c5a.V0(0), c5a.V0(1), c5a.V0(2),
                       c5a.omega0(0), c5a.omega0(1), c5a.omega0(2),
-                      c5a.euler0(0), c5a.euler0(1), c5a.euler0(2);
+                      c5a.euler0(0), c5a.euler0(1), c5a.euler0(2), 0.0f;
     
     // Setup and run RK4 integration
     rk4 rk4Solver(dt, tfinal);
-    Eigen::Matrix<float, 9, 1>* results = rk4Solver.rk4_solver(RBD, initial_state);
+    Eigen::Matrix<float, 10,1>* results = rk4Solver.rk4_solver(RBD, initial_state);
 
     int N_steps = (int)(tfinal / dt);
-    Eigen::Matrix<float, 9, 1> final_state = results[N_steps];
+    Eigen::Matrix<float, 10,1> final_state = results[N_steps];
     
     std::cout << "\n=== Final State (t=" << tfinal << "s) ===" << std::endl;
     std::cout << "Velocity (v_x, v_y, v_z): "

@@ -190,7 +190,7 @@ public:
         }
     }
     // Add these to the DataLogger class in logger.h
-bool logStates(float time, const Eigen::Matrix<float,9,1>& states) {
+bool logStates(float time, const Eigen::Matrix<float,10,1>& states) {
     if (!isOpen || !file.is_open()) {
         return false;
     }
@@ -198,7 +198,8 @@ bool logStates(float time, const Eigen::Matrix<float,9,1>& states) {
     file << time << ","
          << states(0) << "," << states(1) << "," << states(2) << ","
          << states(3) << "," << states(4) << "," << states(5) << ","
-         << states(6) << "," << states(7) << "," << states(8) << "\n";
+         << states(6) << "," << states(7) << "," << states(8) << ","
+         << states(9) << "\n";
     iterationCount++;
     return true;
 }
