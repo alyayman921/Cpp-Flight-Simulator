@@ -63,7 +63,7 @@ Eigen::Matrix<float,10,1> RBDsolve::Equations(Eigen::Matrix<float,10,1> states, 
     // Compute aerodynamic forces
     for (i = 0; i < 3; i++){
         delta_F[i] = Aerodynamic_accel[i] * m;
-        F_aero[i] = delta_F[i];  // Store aerodynamic forces
+        F_aero[i] = delta_F[i];
     }
     
     // Compute moments
@@ -82,11 +82,12 @@ Eigen::Matrix<float,10,1> RBDsolve::Equations(Eigen::Matrix<float,10,1> states, 
     // linear newton
     v_dot = F_total / m - omega.cross(v);
 
-    float w_ddot_state = v_dot(2);
+    //w_dot_state = v_dot(2);
 
     // Angular Newton
-    delta_omega_dot = delta_M - omega.cross(I * omega);
-    delta_omega_dot = I.ldlt().solve(delta_omega_dot);
+    delta_omega_dot(0) = Aerodynamic_accel(3);
+    delta_omega_dot(2) = Aerodynamic_accel(5);
+    delta_omega_dot(1) = Aerodynamic_accel(4);
 
     // Euler Kinematics
     cos_theta = std::cos(euler[1]);
@@ -107,11 +108,7 @@ Eigen::Matrix<float,10,1> RBDsolve::Equations(Eigen::Matrix<float,10,1> states, 
     states_dot(6) = euler_dot(0);
     states_dot(7) = euler_dot(1);
     states_dot(8) = euler_dot(2);
-    states_dot(9) = w_ddot_state;
+    states_dot(9) = w_dot_state;
 
     return states_dot;
-}
-
-void RBDsolve::updatewdot(float a){
-    w_dot_state = a;
 }

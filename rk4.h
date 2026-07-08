@@ -107,7 +107,6 @@ class rk4{
 
                 // Update w_dot_state
                 RBDobj.Equations(y, t + dt);
-                RBDobj.updatewdot(RBDobj.getWDotAccel());
 
                 // Store state
                 state_history[step + 1] = y;

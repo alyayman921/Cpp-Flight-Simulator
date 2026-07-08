@@ -44,7 +44,6 @@ class RBDsolve{
         Eigen::Matrix<float,10,1> Equations(Eigen::Matrix<float,10,1> states, float time = 0.0f);
         Eigen::Matrix<float,10,1> Verify(Eigen::Matrix<float,10,1> states);
         void setState(const Eigen::Matrix<float,10,1>& states);
-        void updatewdot(float a);
         
     private:
         float current_time;  // Store current time for logging

@@ -34,7 +34,7 @@ int main() {
     // Read aircraft data
     raw_data raw = readxlsx(filename);
     aircraft_data c5a = sorting(raw);
-    std::cout<<c5a.SD;
+    //std::cout<<c5a.SD;
     RBDsolve RBD(c5a, Controls);
 
     // Initial state vector: [v(3), omega(3), euler(3)]
