@@ -2,8 +2,8 @@
 #include "derivatives.h"
 #include "RBDEqns.h"
 
-RBDsolve::RBDsolve(aircraft_data ac, Eigen::Matrix<float,4,1> Controls){
-    this->ac = ac; this->g = ac.g; this->m = ac.m; this->I = ac.Inertia; std::cout<< I<<std::endl;
+RBDsolve::RBDsolve(aircraft_data ac, Eigen::Matrix<double,4,1> Controls){
+    this->ac = ac; this->g = ac.g; this->m = ac.m; this->I = ac.Inertia;
     this->F_g0 = ac.mg0; this->v = ac.V0;
     this->omega = ac.omega0; this->euler = ac.euler0;
     this->SD = ac.SD; this->CD = ac.CD;
@@ -17,11 +17,11 @@ RBDsolve::RBDsolve(aircraft_data ac, Eigen::Matrix<float,4,1> Controls){
     F_b.setZero();
 }
 
-Eigen::Vector3f RBDsolve::delta(Eigen::Vector3f state, Eigen::Vector3f state0){
+Eigen::Matrix<double,3,1> RBDsolve::delta(Eigen::Matrix<double,3,1> state, Eigen::Matrix<double,3,1> state0){
     return state - state0;
 }
 
-void RBDsolve::eulerToRotationMatrix(const Eigen::Vector3f& euler) {
+void RBDsolve::eulerToRotationMatrix(const Eigen::Matrix<double,3,1>& euler) {
     double phi = euler(0); double c_phi = std::cos(phi); double s_phi = std::sin(phi);
     double theta = euler(1); double c_theta = std::cos(theta); double s_theta = std::sin(theta);
     double psi = euler(2); double c_psi = std::cos(psi); double s_psi = std::sin(psi);
@@ -39,12 +39,12 @@ void RBDsolve::eulerToRotationMatrix(const Eigen::Vector3f& euler) {
          c_theta * c_phi;
 }
 
-Eigen::Matrix<float,9,1> RBDsolve::Verify(Eigen::Matrix<float,9,1> states){
-    float y1 = states(0);
-    float y2 = states(1);
-    float t  = states(2);
+Eigen::Matrix<double,9,1> RBDsolve::Verify(Eigen::Matrix<double,9,1> states){
+    double y1 = states(0);
+    double y2 = states(1);
+    double t  = states(2);
 
-    Eigen::Matrix<float,9,1> states_dot2;
+    Eigen::Matrix<double,9,1> states_dot2;
     states_dot2.setZero();
 
     states_dot2(0) = std::sin(t) + std::cos(y1) + std::cos(y2);
@@ -54,7 +54,7 @@ Eigen::Matrix<float,9,1> RBDsolve::Verify(Eigen::Matrix<float,9,1> states){
     return states_dot2;
 }
 
-Eigen::Matrix<float,9,1> RBDsolve::Equations(Eigen::Matrix<float,9,1> states, float time){
+Eigen::Matrix<double,9,1> RBDsolve::Equations(Eigen::Matrix<double,9,1> states, double time){
     v = states.segment<3>(0);
     omega = states.segment<3>(3);
     euler = states.segment<3>(6);
@@ -78,7 +78,6 @@ Eigen::Matrix<float,9,1> RBDsolve::Equations(Eigen::Matrix<float,9,1> states, fl
     // Compute aerodynamic forces
     for (i = 0; i < 3; i++){
         delta_F[i] = Aerodynamic_accel[i] * m;
-        //std::cout<<"My Man the mass is \n"<<m;
         F_aero[i] = delta_F[i];  // Store aerodynamic forces
     }
     
@@ -125,6 +124,6 @@ Eigen::Matrix<float,9,1> RBDsolve::Equations(Eigen::Matrix<float,9,1> states, fl
     return states_dot;
 }
 
-void RBDsolve::updatewdot(float a){
+void RBDsolve::updatewdot(double a){
     w_dot_state = a;
 }

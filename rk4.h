@@ -4,16 +4,16 @@
 #include "Eigen/Core"
 #include "Eigen/Dense"
 #include "RBDEqns.h"
-#include "logger.h"  // Include the logger
+#include "logger.h"
 
 class rk4{
     private:
         int i;
-        float dt;
-        float tfinal;
+        double dt;
+        double tfinal;
         int N_steps;
-        float *time_v;
-        Eigen::Matrix<float,9,1> *state_history;
+        double *time_v;
+        Eigen::Matrix<double,9,1> *state_history;
         
         // Loggers
         DataLogger stateLogger;
@@ -22,12 +22,12 @@ class rk4{
         bool loggersInitialized;
 
     public:
-        rk4(float dt, float tfinal) {
+        rk4(double dt, double tfinal) {
             this->dt = dt;
             this->tfinal = tfinal;
             this->N_steps = (int)(tfinal / dt);
-            this->time_v = (float*)malloc(N_steps * sizeof(float));
-            this->state_history = (Eigen::Matrix<float,9,1>*)malloc((N_steps+1) * sizeof(Eigen::Matrix<float,9,1>));
+            this->time_v = (double*)malloc(N_steps * sizeof(double));
+            this->state_history = (Eigen::Matrix<double,9,1>*)malloc((N_steps+1) * sizeof(Eigen::Matrix<double,9,1>));
             this->loggersInitialized = false;
 
             for (int i = 0; i < N_steps; i++) {
@@ -67,12 +67,12 @@ class rk4{
             accelLogger.writeHeader(accelHeaders);
             
             loggersInitialized = true;
-            std::cout << "All loggers initialized successfully!" << std::endl;
+            //std::cout << "All loggers initialized successfully!" << std::endl;
         }
 
-        Eigen::Matrix<float,9,1>* rk4_solver(RBDsolve &RBDobj, Eigen::Matrix<float,9,1> states0){
-            Eigen::Matrix<float,9,1> y = states0;
-            Eigen::Matrix<float,9,1> k1, k2, k3, k4;
+        Eigen::Matrix<double,9,1>* rk4_solver(RBDsolve &RBDobj, Eigen::Matrix<double,9,1> states0){
+            Eigen::Matrix<double,9,1> y = states0;
+            Eigen::Matrix<double,9,1> k1, k2, k3, k4;
 
             // Initialize loggers
             initializeLoggers();
@@ -87,9 +87,9 @@ class rk4{
             accelLogger.logWithTime(0.0f, RBDobj.getAerodynamicAccel());
 
             for (int step = 0; step < N_steps; step++) {
-                float t = step * dt;
-                float t_half = t + dt/2.0f;
-                float t_full = t + dt;
+                double t = step * dt;
+                double t_half = t + dt/2.0f;
+                double t_full = t + dt;
 
                 // k1 = f(t, y)
                 k1 = RBDobj.Equations(y, t);
@@ -106,15 +106,15 @@ class rk4{
                 // y_{n+1} = y_n + dt/6*(k1 + 2k2 + 2k3 + k4)
                 y = y + dt * (k1 + 2.0f * k2 + 2.0f * k3 + k4) / 6.0f;
 
-                // Update w_dot_state
+                // Update w_dot_state using v_dot(2)
                 RBDobj.Equations(y, t + dt);
-                RBDobj.updatewdot(RBDobj.getWDotAccel());
+                RBDobj.updatewdot(RBDobj.getVDotZ());
 
                 // Store state
                 state_history[step + 1] = y;
                 
                 // Log data at this timestep
-                float current_time = (step + 1) * dt;
+                double current_time = (step + 1) * dt;
                 stateLogger.logStates(current_time, y);
                 forceLogger.logForces(current_time, 
                                      RBDobj.getAeroForces(), 

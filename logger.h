@@ -57,7 +57,7 @@ public:
         
         isOpen = true;
         iterationCount = 0;
-        std::cout << "Logging to: " << filename << std::endl;
+        //std::cout << "Logging to: " << filename << std::endl;
         return true;
     }
     
@@ -109,7 +109,7 @@ public:
     
     // Log with time column
     template<typename Derived>
-    bool logWithTime(float time, const Eigen::MatrixBase<Derived>& vec) {
+    bool logWithTime(double time, const Eigen::MatrixBase<Derived>& vec) {
         if (!isOpen) {
             std::cerr << "Error: Logger not initialized for " << filename << std::endl;
             return false;
@@ -127,8 +127,8 @@ public:
         return true;
     }
     
-    // Log raw float array
-    bool logArray(const float* data, int size) {
+    // Log raw double array
+    bool logArray(const double* data, int size) {
         if (!isOpen) {
             std::cerr << "Error: Logger not initialized for " << filename << std::endl;
             return false;
@@ -186,11 +186,11 @@ public:
         if (isOpen && file.is_open()) {
             file.close();
             isOpen = false;
-            std::cout << "Closed log: " << filename << " (" << iterationCount << " entries)" << std::endl;
+            //std::cout << "Closed log: " << filename << " (" << iterationCount << " entries)" << std::endl;
         }
     }
     // Add these to the DataLogger class in logger.h
-bool logStates(float time, const Eigen::Matrix<float,9,1>& states) {
+bool logStates(double time, const Eigen::Matrix<double,9,1>& states) {
     if (!isOpen || !file.is_open()) {
         return false;
     }
@@ -203,9 +203,9 @@ bool logStates(float time, const Eigen::Matrix<float,9,1>& states) {
     return true;
 }
 
-bool logForces(float time, const Eigen::Vector3f& F_aero, 
-               const Eigen::Vector3f& F_grav, 
-               const Eigen::Vector3f& F_total) {
+bool logForces(double time, const Eigen::Matrix<double,3,1>& F_aero, 
+               const Eigen::Matrix<double,3,1>& F_grav, 
+               const Eigen::Matrix<double,3,1>& F_total) {
     if (!isOpen || !file.is_open()) {
         return false;
     }

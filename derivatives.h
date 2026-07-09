@@ -6,26 +6,26 @@
 #include <math.h>
 #include <iostream>
 typedef struct{
-  float Inertia_temp[4];
-  float Vtotal,theta0,z0,m,g;
-  float Xu,Zu,Mu,Xw,Zw,Mw,Zwd,Zq,Mwd,Mq,Xde,Zde,Mde,Xdth,Zdth,Mdth;
-  float G,Yb,Yv,LB ,NB, LP , NP, LR,L_DR , NR, L_DA,N_DA, N_DR,Yda,Ydr;
-  float Lv, Nv;
-  float SD_Long_temp[16];
-  float SD_Lat_dash[14];
-  Eigen::Vector3f V0;
-  Eigen::Vector3f mg0;
+  double Inertia_temp[4];
+  double Vtotal,theta0,z0,m,g;
+  double Xu,Zu,Mu,Xw,Zw,Mw,Zwd,Zq,Mwd,Mq,Xde,Zde,Mde,Xdth,Zdth,Mdth;
+  double G,Yb,Yv,LB ,NB, LP , NP, LR,L_DR , NR, L_DA,N_DA, N_DR,Yda,Ydr;
+  double Lv, Nv;
+  double SD_Long_temp[16];
+  double SD_Lat_dash[14];
+  Eigen::Matrix<double,3,1> V0;
+  Eigen::Matrix<double,3,1> mg0;
   Eigen::VectorXf time_vector;
-  Eigen::Matrix<float,3,1> omega0; 
-  Eigen::Matrix<float,3,1> euler0;
-  Eigen::Matrix<float,3,3> Inertia;
-  Eigen::Matrix<float,9,1> states0;
-  Eigen::Matrix<float, 6, 7> SD;
-  Eigen::Matrix<float, 6, 4> CD;
-  Eigen::Matrix<float, 10, 10> T;
-  Eigen::Matrix<float, 10, 1> lat_dash;
-  Eigen::Matrix<float, 10, 1> Lat_dash;
-  Eigen::Matrix<float, 14, 1> SD_Lat;
+  Eigen::Matrix<double,3,1> omega0; 
+  Eigen::Matrix<double,3,1> euler0;
+  Eigen::Matrix<double,3,3> Inertia;
+  Eigen::Matrix<double,9,1> states0;
+  Eigen::Matrix<double, 6, 7> SD;
+  Eigen::Matrix<double, 6, 4> CD;
+  Eigen::Matrix<double, 10, 10> T;
+  Eigen::Matrix<double, 10, 1> lat_dash;
+  Eigen::Matrix<double, 10, 1> Lat_dash;
+  Eigen::Matrix<double, 14, 1> SD_Lat;
 }aircraft_data;
 
 inline aircraft_data sorting(raw_data raw){
@@ -125,5 +125,6 @@ inline aircraft_data sorting(raw_data raw){
           d.L_DA, 0,0,d.L_DR,
           0,d.Mde ,d.Mdth , 0,
           d.N_DA, 0, 0, d.N_DR;
+  //std::cout<<d.SD<<std::endl;std::cout<<d.CD<<std::endl;
 return d;
 }

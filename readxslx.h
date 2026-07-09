@@ -8,17 +8,17 @@
 inline char temp[21];
 
 typedef struct {
-  float B[65];
+  double B[65];
 } raw_data;
 
-inline void handling(int row,char current_cell[],float floated[]){
+inline void handling(int row,char current_cell[],double doubleed[]){
     int i=0;
     while (current_cell[i]!='\0'){
         temp[i]=current_cell[i];
         i++;
     }
     temp[i]='\0';
-    floated[row]=atof(current_cell);
+    doubleed[row]=atof(current_cell);
 }
 
 
@@ -29,7 +29,7 @@ inline raw_data readxlsx(const char *filename) {
     xlsxioreadersheet sheet;
     char *cell_value;
 
-    printf("Opening file: %s\n", filename);
+    //printf("Opening file: %s\n", filename);
     xlsxioread = xlsxioread_open(filename);
     if (xlsxioread == NULL) {
         fprintf(stderr, "Error: Could not open '%s'\n", filename);
@@ -64,7 +64,7 @@ inline raw_data readxlsx(const char *filename) {
             //printf("Row %d: (empty row)\n", row_count);
         }
     }
-    printf("Read Successful\n");
+    //printf("Read Successful\n");
 
     /* Cleanup */
     xlsxioread_sheet_close(sheet);
