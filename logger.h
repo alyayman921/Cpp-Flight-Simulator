@@ -217,6 +217,16 @@ bool logForces(double time, const Eigen::Matrix<double,3,1>& F_aero,
     iterationCount++;
     return true;
 }
+bool logMoments(double time, const Eigen::Matrix<double,3,1>& M_total) {
+    if (!isOpen || !file.is_open()) {
+        return false;
+    }
+    
+    file << time << ","
+         << M_total(0) << "," << M_total(1) << "," << M_total(2) << "\n";
+    iterationCount++;
+    return true;
+}
     
     bool isActive() const { return isOpen; }
     int getIterationCount() const { return iterationCount; }

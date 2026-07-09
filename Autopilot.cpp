@@ -10,8 +10,6 @@
 
 const char filename[] = "meta/C5A.xlsx";
 Eigen::Matrix<double, 4, 1> Controls;
-const double dt = 0.01;
-const double tfinal = 20;
 
 bool fileExists(const char* path) {
     struct stat buffer;
@@ -25,11 +23,20 @@ int main() {
         return 1;
     }
 
-    if (!readControlsFromFile("controls.txt", Controls)) {
+    // Variables to be read from controls file
+    double dt = 0.01;      // Default values
+    double tfinal = 100.0;
+    
+    if (!readControlsFromFile("controls.txt", Controls, dt, tfinal)) {
         std::cerr << "Failed to read controls. Using defaults..." << std::endl;
         Controls << 0.0, 0.0, 1000.0, 0.05;
+        dt = 0.01;
+        tfinal = 100.0;
     }   
     std::cout << "Controls loaded: " << Controls.transpose() << std::endl;
+    std::cout << "Timestep: " << dt << " s" << std::endl;
+    std::cout << "Final time: " << tfinal << " s" << std::endl;
+    std::cout << "Number of steps: " << (int)(tfinal / dt) << std::endl;
 
     // Read aircraft data
     raw_data raw = readxlsx(filename);

@@ -19,6 +19,7 @@ class rk4{
         DataLogger stateLogger;
         DataLogger forceLogger;
         DataLogger accelLogger;
+        DataLogger momentLogger; 
         bool loggersInitialized;
 
     public:
@@ -65,7 +66,11 @@ class rk4{
                 "time", "ax", "ay", "az", "alpha", "beta", "gamma"
             };
             accelLogger.writeHeader(accelHeaders);
-            
+             momentLogger.init("moments");
+            std::vector<std::string> momentHeaders = {
+                "time", "Mx", "My", "Mz"
+            };
+            momentLogger.writeHeader(momentHeaders);
             loggersInitialized = true;
             //std::cout << "All loggers initialized successfully!" << std::endl;
         }
@@ -81,10 +86,11 @@ class rk4{
             state_history[0] = states0;
             
             // Log initial state (t=0)
-            RBDobj.Equations(y, 0.0f);
-            stateLogger.logStates(0.0f, y);
-            forceLogger.logForces(0.0f, RBDobj.getAeroForces(), RBDobj.getGravForces(), RBDobj.getTotalForces());
-            accelLogger.logWithTime(0.0f, RBDobj.getAerodynamicAccel());
+            RBDobj.Equations(y, 0.0);
+            stateLogger.logStates(0.0, y);
+            forceLogger.logForces(0.0, RBDobj.getAeroForces(), RBDobj.getGravForces(), RBDobj.getTotalForces());
+            accelLogger.logWithTime(0.0, RBDobj.getAerodynamicAccel());
+            momentLogger.logMoments(0.0, RBDobj.getTotalMoments());
 
             for (int step = 0; step < N_steps; step++) {
                 double t = step * dt;
@@ -121,6 +127,8 @@ class rk4{
                                      RBDobj.getGravForces(), 
                                      RBDobj.getTotalForces());
                 accelLogger.logWithTime(current_time, RBDobj.getAerodynamicAccel());
+                momentLogger.logMoments(current_time, RBDobj.getTotalMoments());
+
             }
 
             return state_history;
@@ -134,5 +142,6 @@ class rk4{
             stateLogger.close();
             forceLogger.close();
             accelLogger.close();
+            momentLogger.close();
         }
 };

@@ -29,12 +29,14 @@ class RBDsolve{
         Eigen::Matrix<double,3,1> F_b;
         Eigen::Matrix<double,3,1> F_g0;
         Eigen::Matrix<double,3,1> F_g;
+        Eigen::Matrix<double,3,1> M_total;
         
         // Getters for logging
         Eigen::Matrix<double,6,1> getAerodynamicAccel() const { return Aerodynamic_accel; }
         Eigen::Matrix<double,3,1> getAeroForces() const { return F_aero; }
         Eigen::Matrix<double,3,1> getGravForces() const { return F_grav; }
         Eigen::Matrix<double,3,1> getTotalForces() const { return F_b; }
+        Eigen::Matrix<double,3,1> getTotalMoments() const { return M_total; }
         double getWDotAccel() const { return w_dot_state; }
         double getVDotZ() const { return v_dot(2); }
         double getCurrentTime() const { return current_time; }

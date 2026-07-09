@@ -9,12 +9,13 @@ RBDsolve::RBDsolve(aircraft_data ac, Eigen::Matrix<double,4,1> Controls){
     this->SD = ac.SD; this->CD = ac.CD;
     this->w_dot_state = 0;
     this->Controls = Controls;
-    this->current_time = 0.0f;
+    this->current_time = 0.0;
     
     // Initialize force vectors
     F_aero.setZero();
     F_grav.setZero();
     F_b.setZero();
+    M_total.setZero();
 }
 
 Eigen::Matrix<double,3,1> RBDsolve::delta(Eigen::Matrix<double,3,1> state, Eigen::Matrix<double,3,1> state0){
@@ -85,6 +86,7 @@ Eigen::Matrix<double,9,1> RBDsolve::Equations(Eigen::Matrix<double,9,1> states, 
     for (i = 3; i < 6; i++){
         delta_M[i-3] = Aerodynamic_accel[i] * I.coeff(i-3, i-3);
     }
+    M_total = delta_M;
 
     // Compute gravitational forces
     F_grav(0) = -m * g * sin(euler[1]) - F_g0[0];
