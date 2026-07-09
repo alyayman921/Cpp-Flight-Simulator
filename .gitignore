@@ -1,5 +1,5 @@
- Autopilot
- controls.txt
- tests*
- test*
- /logs
+Autopilot
+controls.txt
+tests*
+test*
+/logs
