@@ -19,8 +19,8 @@ class RBDsolve{
         Eigen::Matrix<float,4,1> Controls;
         Eigen::Matrix<float,6,1> Aerodynamic_accel;
         Eigen::Matrix<float,3,1> delta_v, delta_omega, delta_F, delta_M;
-        Eigen::Matrix<float,10,1> states_dot;
-        Eigen::Matrix<float,10,1> states0;
+        Eigen::Matrix<float,9,1> states_dot;
+        Eigen::Matrix<float,9,1> states0;
         aircraft_data ac;
 
     public:
@@ -41,9 +41,10 @@ class RBDsolve{
         RBDsolve(aircraft_data ac, Eigen::Matrix<float,4,1> Controls);
         Eigen::Vector3f delta(Eigen::Vector3f state, Eigen::Vector3f state0);
         void eulerToRotationMatrix(const Eigen::Vector3f& euler);
-        Eigen::Matrix<float,10,1> Equations(Eigen::Matrix<float,10,1> states, float time = 0.0f);
-        Eigen::Matrix<float,10,1> Verify(Eigen::Matrix<float,10,1> states);
-        void setState(const Eigen::Matrix<float,10,1>& states);
+        Eigen::Matrix<float,9,1> Equations(Eigen::Matrix<float,9,1> states, float time = 0.0f);
+        Eigen::Matrix<float,9,1> Verify(Eigen::Matrix<float,9,1> states);
+        void setState(const Eigen::Matrix<float,9,1>& states);
+        void updatewdot(float a);
         
     private:
         float current_time;  // Store current time for logging

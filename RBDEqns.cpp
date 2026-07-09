@@ -39,11 +39,25 @@ void RBDsolve::eulerToRotationMatrix(const Eigen::Vector3f& euler) {
          c_theta * c_phi;
 }
 
-Eigen::Matrix<float,10,1> RBDsolve::Equations(Eigen::Matrix<float,10,1> states, float time){
+Eigen::Matrix<float,9,1> RBDsolve::Verify(Eigen::Matrix<float,9,1> states){
+    float y1 = states(0);
+    float y2 = states(1);
+    float t  = states(2);
+
+    Eigen::Matrix<float,9,1> states_dot2;
+    states_dot2.setZero();
+
+    states_dot2(0) = std::sin(t) + std::cos(y1) + std::cos(y2);
+    states_dot2(1) = std::cos(t) + std::sin(y2) + std::cos(y1);
+    states_dot2(2) = 1.0f;
+
+    return states_dot2;
+}
+
+Eigen::Matrix<float,9,1> RBDsolve::Equations(Eigen::Matrix<float,9,1> states, float time){
     v = states.segment<3>(0);
     omega = states.segment<3>(3);
     euler = states.segment<3>(6);
-    float w_dot_state = states(9);
     current_time = time;
 
     // calculate forces and moments
@@ -74,10 +88,9 @@ Eigen::Matrix<float,10,1> RBDsolve::Equations(Eigen::Matrix<float,10,1> states, 
     }
 
     // Compute gravitational forces
-    F_grav(0) = -m * g * sin(euler[1]) ;
-    F_grav(1) =  m * g * cos(euler[1]) * sin(euler[0]) ;
-    F_grav(2) =  m * g * cos(euler[1]) * cos(euler[0]);
-
+    F_grav(0) = -m * g * sin(euler[1]) - F_g0[0];
+    F_grav(1) =  m * g * cos(euler[1]) * sin(euler[0]) - F_g0[1];
+    F_grav(2) =  m * g * cos(euler[1]) * cos(euler[0]) - F_g0[2];
 
     // Total body forces
     F_b = delta_F + F_grav;
@@ -85,12 +98,9 @@ Eigen::Matrix<float,10,1> RBDsolve::Equations(Eigen::Matrix<float,10,1> states, 
     // linear newton
     v_dot = F_b / m - omega.cross(v); // Matlab 6DOF Abb
 
-    //w_dot_state = v_dot(2);
-
     // Angular Newton
-    delta_omega_dot(0) = Aerodynamic_accel(3);
-    delta_omega_dot(2) = Aerodynamic_accel(5);
-    delta_omega_dot(1) = Aerodynamic_accel(4);
+    delta_omega_dot = delta_M - omega.cross(I * omega);
+    delta_omega_dot = I.ldlt().solve(delta_omega_dot);
 
     // Euler Kinematics
     cos_theta = std::cos(euler[1]);
@@ -111,7 +121,10 @@ Eigen::Matrix<float,10,1> RBDsolve::Equations(Eigen::Matrix<float,10,1> states, 
     states_dot(6) = euler_dot(0);
     states_dot(7) = euler_dot(1);
     states_dot(8) = euler_dot(2);
-    states_dot(9) = w_dot_state;
 
     return states_dot;
+}
+
+void RBDsolve::updatewdot(float a){
+    w_dot_state = a;
 }
