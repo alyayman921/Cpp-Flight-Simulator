@@ -26,7 +26,7 @@ class RBDsolve{
     public:
         Eigen::Vector3f F_aero;
         Eigen::Vector3f F_grav;
-        Eigen::Vector3f F_total;
+        Eigen::Vector3f F_b;
         Eigen::Vector3f F_g0;
         Eigen::Vector3f F_g;
         
@@ -34,7 +34,7 @@ class RBDsolve{
         Eigen::Matrix<float,6,1> getAerodynamicAccel() const { return Aerodynamic_accel; }
         Eigen::Vector3f getAeroForces() const { return F_aero; }
         Eigen::Vector3f getGravForces() const { return F_grav; }
-        Eigen::Vector3f getTotalForces() const { return F_total; }
+        Eigen::Vector3f getTotalForces() const { return F_b; }
         float getWDotAccel() const { return w_dot_state; }
         float getCurrentTime() const { return current_time; }
         

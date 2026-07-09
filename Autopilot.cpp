@@ -11,7 +11,7 @@
 const char filename[] = "meta/C5A.xlsx";
 Eigen::Matrix<float, 4, 1> Controls;
 const float dt = 0.01;
-const float tfinal = 200;
+const float tfinal = 20;
 
 bool fileExists(const char* path) {
     struct stat buffer;
