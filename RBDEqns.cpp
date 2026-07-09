@@ -3,7 +3,7 @@
 #include "RBDEqns.h"
 
 RBDsolve::RBDsolve(aircraft_data ac, Eigen::Matrix<float,4,1> Controls){
-    this->ac = ac; this->g = ac.g; this->m = ac.m; this->I = ac.Inertia;
+    this->ac = ac; this->g = ac.g; this->m = ac.m; this->I = ac.Inertia; std::cout<< I<<std::endl;
     this->F_g0 = ac.mg0; this->v = ac.V0;
     this->omega = ac.omega0; this->euler = ac.euler0;
     this->SD = ac.SD; this->CD = ac.CD;
@@ -14,7 +14,7 @@ RBDsolve::RBDsolve(aircraft_data ac, Eigen::Matrix<float,4,1> Controls){
     // Initialize force vectors
     F_aero.setZero();
     F_grav.setZero();
-    F_total.setZero();
+    F_b.setZero();
 }
 
 Eigen::Vector3f RBDsolve::delta(Eigen::Vector3f state, Eigen::Vector3f state0){
@@ -49,6 +49,7 @@ Eigen::Matrix<float,10,1> RBDsolve::Equations(Eigen::Matrix<float,10,1> states, 
     // calculate forces and moments
     delta_v = delta(v, ac.V0);
     delta_omega = delta(omega, ac.omega0);
+
     // Build delta_states
     delta_states(0) = delta_v(0);
     delta_states(1) = delta_v(1);
@@ -63,7 +64,8 @@ Eigen::Matrix<float,10,1> RBDsolve::Equations(Eigen::Matrix<float,10,1> states, 
     // Compute aerodynamic forces
     for (i = 0; i < 3; i++){
         delta_F[i] = Aerodynamic_accel[i] * m;
-        F_aero[i] = delta_F[i];
+        //std::cout<<"My Man the mass is \n"<<m;
+        F_aero[i] = delta_F[i];  // Store aerodynamic forces
     }
     
     // Compute moments
@@ -76,11 +78,12 @@ Eigen::Matrix<float,10,1> RBDsolve::Equations(Eigen::Matrix<float,10,1> states, 
     F_grav(1) =  m * g * cos(euler[1]) * sin(euler[0]) ;
     F_grav(2) =  m * g * cos(euler[1]) * cos(euler[0]);
 
-    // Total forces
-    F_total = delta_F + F_grav - F_g0;
+
+    // Total body forces
+    F_b = delta_F + F_grav;
 
     // linear newton
-    v_dot = F_total / m - omega.cross(v);
+    v_dot = F_b / m - omega.cross(v); // Matlab 6DOF Abb
 
     //w_dot_state = v_dot(2);
 

@@ -4,7 +4,7 @@
 #include "Eigen/Core"
 #include "Eigen/Dense"
 #include <math.h>
-
+#include <iostream>
 typedef struct{
   float Inertia_temp[4];
   float Vtotal,theta0,z0,m,g;
@@ -38,10 +38,9 @@ inline aircraft_data sorting(raw_data raw){
   }
   d.Vtotal=sqrt(pow(d.V0[0],2)+pow(d.V0[1],2)+pow(d.V0[2],2));
   d.theta0=raw.B[12]; // rad 
-  d.m=raw.B[52];
-  d.g=raw.B[53];
+  d.m=raw.B[52];d.g=raw.B[53];
   d.mg0 << -sin(d.theta0) , 0 , cos(d.theta0);
-  d.mg0=d.m*d.g *d.mg0;
+  d.mg0=d.m * d.g * d.mg0;
   d.z0=raw.B[16];
   for (int i=8;i<11;i++){
     d.omega0[i-8]=raw.B[i];
@@ -55,9 +54,9 @@ inline aircraft_data sorting(raw_data raw){
   d.Inertia_temp[i-54] = raw.B[i]; 
   }
 
-  d.Inertia<< d.Inertia_temp[0],      0,            d.Inertia_temp[3],
+  d.Inertia<< d.Inertia_temp[0],      0,            -d.Inertia_temp[3],
                     0,          d.Inertia_temp[1],        0,
-              d.Inertia_temp[3],      0 ,            d.Inertia_temp[2];
+              -d.Inertia_temp[3],      0 ,            d.Inertia_temp[2];
 
   // Long Stability Derivatives
   d.Xu=raw.B[22];d.Zu=raw.B[23];d.Mu=raw.B[24];
@@ -69,8 +68,9 @@ inline aircraft_data sorting(raw_data raw){
   // Lat Stability Derivatives
   for(int i=38;i<52;i++){
     d.SD_Lat_dash[i-38] = raw.B[i];
+    //std::cout << raw.B[i];
   }
-  // rbna m3ak fe el cleanup
+  
   d.Yda=raw.B[46];d.Ydr=raw.B[47];
   d.G=1/(1-(pow(d.Inertia_temp[3],2)/(d.Inertia_temp[0]*d.Inertia_temp[2])));
   d.Yv = d.SD_Lat_dash[0];d.Yb = d.SD_Lat_dash[1];d.LB = d.SD_Lat_dash[2];
