@@ -1,3 +1,6 @@
+*.csv
+*.slx
+*.slxc
 slprj/
 Autopilot
 controls.txt
