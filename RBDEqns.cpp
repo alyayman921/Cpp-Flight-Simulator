@@ -1,8 +1,10 @@
 #include "readxslx.h"
 #include "derivatives.h"
 #include "RBDEqns.h"
+//float eps = 0.00000011921; // matlab float eps
+double eps = 0.000000000000000222044605;
 
-RBDsolve::RBDsolve(aircraft_data ac, Eigen::Matrix<double,4,1> Controls){
+RBDsolve::RBDsolve(aircraft_data ac, Eigen::Matrix<double,4,1>* Controls,bool Autopiloted){
     this->ac = ac; this->g = ac.g; this->m = ac.m; this->I = ac.Inertia;
     this->F_g0 = ac.mg0; this->v = ac.V0;
     this->omega = ac.omega0; this->euler = ac.euler0;
@@ -74,7 +76,8 @@ Eigen::Matrix<double,9,1> RBDsolve::Equations(Eigen::Matrix<double,9,1> states, 
     delta_states(5) = delta_omega(2);
     delta_states(6) = w_dot_state;
 
-    Aerodynamic_accel = SD * delta_states + CD * Controls;
+    // Calculate Aerodynamic Accelerations
+    Aerodynamic_accel = SD * delta_states + CD * (*Controls);
 
     // Compute aerodynamic forces
     for (i = 0; i < 3; i++){
@@ -105,7 +108,7 @@ Eigen::Matrix<double,9,1> RBDsolve::Equations(Eigen::Matrix<double,9,1> states, 
 
     // Euler Kinematics
     cos_theta = std::cos(euler[1]);
-    if (std::abs(cos_theta) < 0.001f) cos_theta = 0.001f;
+    if (std::abs(cos_theta) < eps) cos_theta = eps;
 
     J << 1, sin(euler[0])*tan(euler[1]), cos(euler[0])*tan(euler[1]),
          0, cos(euler[0]),               -sin(euler[0]),

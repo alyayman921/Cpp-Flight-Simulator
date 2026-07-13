@@ -1,11 +1,9 @@
 #pragma once
 
 #include <cstdlib>
-#include "Eigen/Core"
-#include "Eigen/Dense"
 #include "RBDEqns.h"
 #include "logger.h"
-
+#include "controller.h"
 class rk4{
     private:
         int i;
@@ -13,7 +11,6 @@ class rk4{
         double tfinal;
         int N_steps;
         double *time_v;
-        Eigen::Matrix<double,9,1> *state_history;
         
         // Loggers
         DataLogger stateLogger;
@@ -23,6 +20,7 @@ class rk4{
         bool loggersInitialized;
 
     public:
+        Eigen::Matrix<double,9,1> *state_history;
         rk4(double dt, double tfinal) {
             this->dt = dt;
             this->tfinal = tfinal;
@@ -74,8 +72,12 @@ class rk4{
             loggersInitialized = true;
             //std::cout << "All loggers initialized successfully!" << std::endl;
         }
+        void resultsPointer(controller &con_obj){
+            // send the adress of results to controller
+            con_obj.rk4_pointers(state_history);
+        }
 
-        Eigen::Matrix<double,9,1>* rk4_solver(RBDsolve &RBDobj, Eigen::Matrix<double,9,1> states0){
+        Eigen::Matrix<double,9,1>* rk4_solver(RBDsolve &RBDobj, controller &con_obj, Eigen::Matrix<double,9,1> states0){
             Eigen::Matrix<double,9,1> y = states0;
             Eigen::Matrix<double,9,1> k1, k2, k3, k4;
 
@@ -84,7 +86,7 @@ class rk4{
 
             // Store initial state
             state_history[0] = states0;
-            
+
             // Log initial state (t=0)
             RBDobj.Equations(y, 0.0);
             stateLogger.logStates(0.0, y);
@@ -92,10 +94,14 @@ class rk4{
             accelLogger.logWithTime(0.0, RBDobj.getAerodynamicAccel());
             momentLogger.logMoments(0.0, RBDobj.getTotalMoments());
 
+            // update the controllers for the
+
             for (int step = 0; step < N_steps; step++) {
+
                 double t = step * dt;
                 double t_half = t + dt/2.0f;
                 double t_full = t + dt;
+
 
                 // k1 = f(t, y)
                 k1 = RBDobj.Equations(y, t);
@@ -119,6 +125,9 @@ class rk4{
                 // Store state
                 state_history[step + 1] = y;
                 
+                // update the controllers after solving
+                con_obj.pitch_controller(step);
+                
                 // Log data at this timestep
                 double current_time = (step + 1) * dt;
                 stateLogger.logStates(current_time, y);
@@ -128,6 +137,7 @@ class rk4{
                                      RBDobj.getTotalForces());
                 accelLogger.logWithTime(current_time, RBDobj.getAerodynamicAccel());
                 momentLogger.logMoments(current_time, RBDobj.getTotalMoments());
+
 
             }
 

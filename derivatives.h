@@ -1,8 +1,7 @@
 #pragma once
-
+#include <Eigen/Core>
+#include <Eigen/Dense>
 #include <stdio.h>
-#include "Eigen/Core"
-#include "Eigen/Dense"
 #include <math.h>
 #include <iostream>
 typedef struct{
