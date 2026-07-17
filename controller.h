@@ -24,7 +24,9 @@ class controller{
 			this->Autopiloted=Autopiloted;
 			this->dt=dt;
 			this->set_pitch=set_pitch;
-			*Controls={0,0,0,0};
+			if (Autopiloted){
+				*Controls={0,0,0,0};
+			}
 		}
 
 		void rk4_pointers(Eigen::Matrix<double, 9, 1>* results){
@@ -41,21 +43,23 @@ class controller{
 				if (step<1){
 					yd_pitch=(set_pitch-results[step][7])*(1.9948); // y dot from drawing, maybe try delta theta instead of theta
 					de=0;
-				}else{
+					}else{
+					//std::cout<<"Autopilot State = "<<Autopiloted<<std::endl;
 					y_pitch += yd_pitch*dt;
 					yd_pitch = (set_pitch-results[step][7])*(1.9948); // y dot prev, used in next step, where ynow=yprev+yd*dt
-
-				de= y_pitch - ((results[step][7]*1.734+results[step][4])*1.5236);
-				de=-de;
-				}
-				if (de>de_max){de=de_max;}
-				if (de<de_min){de=de_min;}
-				*Controls={da,de,dth,dr};
-				if (step%100==0){
-					//std::cout<<"step "<<step<<std::endl;
-					//std::cout<<*Controls<<"\n";
-					//std::cout<<"pitch angle "<<results[step][7]*180/3.1415<<std::endl;
-					//std::cout<<"delta elevator ="<<de<<std::endl;
+					de= y_pitch - ((results[step][7]*1.734+results[step][4])*1.5236);
+					de=-de;
+					if (de>de_max){de=de_max;}
+					if (de<de_min){de=de_min;}
+					*Controls={da,de,dth,dr};
+					/*
+					if (step%100==0){
+						//std::cout<<"step "<<step<<std::endl;
+						//std::cout<<*Controls<<"\n";
+						//std::cout<<"pitch angle "<<results[step][7]*180/3.1415<<std::endl;
+						//std::cout<<"delta elevator ="<<de<<std::endl;
+					}
+					*/
 				}
 			}
 		}

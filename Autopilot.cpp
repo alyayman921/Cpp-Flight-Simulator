@@ -1,5 +1,4 @@
 #include "Autopilot.h"
-#include "controller.h"
 
 bool fileExists(const char* path) {
     struct stat buffer;
@@ -7,16 +6,27 @@ bool fileExists(const char* path) {
 }
 
 int main(int argc, char* argv[]) {
-    //
-    
+    /*
     for (int i=0;i<argc;i++){
         printf("%s\n",argv[i]);
     }
+    */
 
     if (argc >= 2){
         std::string arg = argv[1];
-        if (arg == "1") {
+        if (arg == "--help") {
+            std::cout<< "\nFlight Simulator for Lockheed Martin's C5A Aircraft\n";
+            std::cout<< "Run the Simulator with the supported input arguments like \"./Autopilot arg\"\n\n";
+            std::cout<<"Arguments    Usage\n--------------------------------------------------\n";
+            std::cout<<"manual       read the control commands from the textfile controls.txt\n";
+            std::cout<<"loop         prevent the program from exiting after solving\n";
+            return 0;
+        }
+        if (arg == "loop") {
             loop = true;
+        }
+        if (arg == "manual") {
+            Autopiloted = false;
         }
     }
     if (!fileExists(filename)){
@@ -45,8 +55,8 @@ int main(int argc, char* argv[]) {
     aircraft_data c5a = sorting(raw);
 
     // Initialize the controller and keep the control vector the same across files
-    controller c(&Controls,dt,set_pitch,true);
-    RBDsolve RBD(c5a, &Controls,true);
+    controller c(&Controls,dt,set_pitch,Autopiloted);
+    RBDsolve RBD(c5a, &Controls,Autopiloted);
     //std::cout<<"Controller Didn't Crash it"<<std::endl;
 
 
@@ -81,8 +91,9 @@ int main(int argc, char* argv[]) {
     }
 
     rk4Solver.free_results();
-    while (loop){
-
+    if (loop){
+        std::cout<<"Press any key to exit\n";
+        std::cin >> dt;
     }
     return 0;
 }

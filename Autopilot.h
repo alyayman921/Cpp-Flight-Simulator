@@ -19,6 +19,7 @@ double rad2deg=180.0/pi;
 double set_pitch=20*deg2rad;
 const char filename[] = "meta/C5A.xlsx";
 Eigen::Matrix<double, 4, 1> Controls;
+bool Autopiloted=true;
 
 bool fileExists(const char* path);
     
