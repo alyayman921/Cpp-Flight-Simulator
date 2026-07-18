@@ -14,21 +14,29 @@ int main(int argc, char* argv[]) {
 
     if (argc >= 2){
         std::string arg = argv[1];
-        if (arg == "--help") {
+        if (argv[1] == "--help") {
             std::cout<< "\nFlight Simulator for Lockheed Martin's C5A Aircraft\n";
             std::cout<< "Run the Simulator with the supported input arguments like \"./Autopilot arg\"\n\n";
-            std::cout<<"Arguments    Usage\n--------------------------------------------------\n";
+            std::cout<<"Arguments    Usage\n";
+            std::cout<<"---------    ---------------------------------------------------------\n";
             std::cout<<"manual       read the control commands from the textfile controls.txt\n";
             std::cout<<"loop         prevent the program from exiting after solving\n";
             return 0;
         }
-        if (arg == "loop") {
-            loop = true;
-        }
-        if (arg == "manual") {
-            Autopiloted = false;
+        for(int i=0;i<argc;i++){
+            arg=argv[i];
+            if (arg == "loop") {
+                std::cout<<"Prevent from Exit : True\n";
+                loop = true;
+            }
+            if (arg == "manual") {
+                std::cout<<"Using Autopilot : False\n";
+                Autopiloted = false;
+            }
         }
     }
+
+
     if (!fileExists(filename)){
         std::cerr << "Error: aircraft data file not found at '" << filename << "'" << std::endl;
         std::cerr << "Run this from the directory containing meta/C5A.xlsx" << std::endl;
@@ -92,7 +100,7 @@ int main(int argc, char* argv[]) {
 
     rk4Solver.free_results();
     if (loop){
-        std::cout<<"Press any key to exit\n";
+        std::cout<<"Press Ctrl+C to Exit\n";
         std::cin >> dt;
     }
     return 0;
