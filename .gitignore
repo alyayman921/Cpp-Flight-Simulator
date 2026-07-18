@@ -4,8 +4,9 @@
 *.slxc
 slprj/
 Autopilot
-controls.txt
+#controls.txt
 tests*
 test*
 /logs
 meta/.~lock.C5A.xlsx#
+FlightSimulator

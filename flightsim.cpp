@@ -1,9 +1,9 @@
-#include "flightsim.h"
+#include "src/flightsim.h"
 
-bool fileExists(const char* path) {
-    struct stat buffer;
-    return (stat(path, &buffer) == 0);
-}
+// bool fileExists(const char* path) {
+//     struct stat buffer;
+//     return (stat(path, &buffer) == 0);
+// }
 
 int main(int argc, char* argv[]) {
     /*
@@ -19,6 +19,7 @@ int main(int argc, char* argv[]) {
             std::cout<< "Run the Simulator with the supported input arguments like \"./Autopilot arg\"\n\n";
             std::cout<<"Arguments    Usage\n";
             std::cout<<"---------    ---------------------------------------------------------\n";
+            std::cout<<"--help       print this message\n";
             std::cout<<"manual       read the control commands from the textfile controls.txt\n";
             std::cout<<"loop         prevent the program from exiting after solving\n";
             return 0;
@@ -37,11 +38,11 @@ int main(int argc, char* argv[]) {
     }
 
 
-    if (!fileExists(filename)){
-        std::cerr << "Error: aircraft data file not found at '" << filename << "'" << std::endl;
-        std::cerr << "Run this from the directory containing meta/C5A.xlsx" << std::endl;
-        return 1;
-    }
+    // if (!fileExists(filename)){
+    //     std::cerr << "Error: aircraft data file not found at '" << filename << "'" << std::endl;
+    //     std::cerr << "Run this from the directory containing meta/C5A.xlsx" << std::endl;
+    //     return 1;
+    // }
 
     // Variables to be read from controls file
     double dt = 0.01;      // Default values
@@ -87,11 +88,11 @@ int main(int argc, char* argv[]) {
     Eigen::Matrix<double, 9, 1> final_state = results[N_steps];
 
     std::cout << "\n=== Final State (t=" << tfinal << "s) ===" << std::endl;
-    std::cout << "Velocity (v_x, v_y, v_z): "
+    std::cout << "Velocity ft/s (v_x, v_y, v_z): "
               << final_state(0) << ", " << final_state(1) << ", " << final_state(2) << std::endl;
-    std::cout << "Angular velocity (p, q, r): "
+    std::cout << "Angular velocity rad/s (p, q, r): "
               << final_state(3) << ", " << final_state(4) << ", " << final_state(5) << std::endl;
-    std::cout << "Euler angles (phi, theta, psi): "
+    std::cout << "Euler angles in Degrees (phi, theta, psi): "
               << final_state(6)*rad2deg << ", " << final_state(7)*rad2deg << ", " << final_state(8)*rad2deg << std::endl;
 
     if (!final_state.allFinite()) {
@@ -101,7 +102,7 @@ int main(int argc, char* argv[]) {
     rk4Solver.free_results();
     if (loop){
         std::cout<<"Press Ctrl+C to Exit\n";
-        std::cin >> dt;
+        std::cin >> argv[0];
     }
     return 0;
 }
