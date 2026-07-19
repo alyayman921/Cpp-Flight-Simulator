@@ -6,35 +6,42 @@
 // }
 
 int main(int argc, char* argv[]) {
-    /*
-    for (int i=0;i<argc;i++){
-        printf("%s\n",argv[i]);
-    }
-    */
+    
+    // Read aircraft data
+    raw_data raw = readxlsx(filename);
+    aircraft_data c5a = sorting(raw);
 
+    // Input handling
     if (argc >= 2){
         std::string arg = argv[1];
-        if (argv[1] == "--help") {
+        if (arg == "--help") {
             std::cout<< "\nFlight Simulator for Lockheed Martin's C5A Aircraft\n";
-            std::cout<< "Run the Simulator with the supported input arguments like \"./Autopilot arg\"\n\n";
+            std::cout<< "Run the Simulator with the supported input arguments like \"./FlightSim --arg\"\n\n";
             std::cout<<"Arguments    Usage\n";
             std::cout<<"---------    ---------------------------------------------------------\n";
             std::cout<<"--help       print this message\n";
-            std::cout<<"manual       read the control commands from the textfile controls.txt\n";
-            std::cout<<"loop         prevent the program from exiting after solving\n";
+            std::cout<<"--loop       prevent the program from exiting after solving\n";
+            std::cout<<"--manual     read the control commands from the textfile controls.txt\n";
             return 0;
         }
         for(int i=0;i<argc;i++){
             arg=argv[i];
-            if (arg == "loop") {
+            if (arg == "--loop") {
                 std::cout<<"Prevent from Exit : True\n";
                 loop = true;
             }
-            if (arg == "manual") {
+            if (arg == "--manual") {
                 std::cout<<"Using Autopilot : False\n";
                 Autopiloted = false;
             }
+
         }
+    }else{
+        std::cout<<"Pitch Autopilot change (Degrees): ";
+        std::cin >> set_pitch; set_pitch=set_pitch*deg2rad+c5a.euler0(1);
+        std::cout<<"Velocity Autopilot change (ft/s): ";
+        std::cin >> set_vel ;set_vel += c5a.V0(0);
+
     }
 
 
@@ -54,17 +61,13 @@ int main(int argc, char* argv[]) {
         dt = 0.01;
         tfinal = 100.0;
     }   
-    std::cout << "Controls loaded: " << Controls.transpose() << std::endl;
+    if (!Autopiloted){std::cout << "Controls loaded: " << Controls.transpose() << std::endl;}
     std::cout << "Timestep: " << dt << " s" << std::endl;
     std::cout << "Final time: " << tfinal << " s" << std::endl;
     std::cout << "Number of steps: " << (int)(tfinal / dt) << std::endl;
 
-    // Read aircraft data
-    raw_data raw = readxlsx(filename);
-    aircraft_data c5a = sorting(raw);
-
     // Initialize the controller and keep the control vector the same across files
-    controller c(&Controls,dt,set_pitch,Autopiloted);
+    controller c(&Controls,dt,set_pitch, set_vel,Autopiloted);
     RBDsolve RBD(c5a, &Controls,Autopiloted);
     //std::cout<<"Controller Didn't Crash it"<<std::endl;
 
@@ -79,21 +82,17 @@ int main(int argc, char* argv[]) {
     // Setup and run RK4 integration
     rk4 rk4Solver(dt, tfinal);
     rk4Solver.resultsPointer(c);
-    //std::cout<<"rk4 init Didn't Crash it"<<std::endl;
-
     Eigen::Matrix<double, 9, 1>* results = rk4Solver.rk4_solver(RBD,c, initial_state);
-    //std::cout<<"surely this Didn't Crash it"<<std::endl;
-
     int N_steps = (int)(tfinal / dt);
     Eigen::Matrix<double, 9, 1> final_state = results[N_steps];
 
     std::cout << "\n=== Final State (t=" << tfinal << "s) ===" << std::endl;
     std::cout << "Velocity ft/s (v_x, v_y, v_z): "
               << final_state(0) << ", " << final_state(1) << ", " << final_state(2) << std::endl;
-    std::cout << "Angular velocity rad/s (p, q, r): "
-              << final_state(3) << ", " << final_state(4) << ", " << final_state(5) << std::endl;
+    //std::cout << "Angular velocity rad/s (p, q, r): "
+    //          << final_state(3) << ", " << final_state(4) << ", " << final_state(5) << std::endl;
     std::cout << "Euler angles in Degrees (phi, theta, psi): "
-              << final_state(6)*rad2deg << ", " << final_state(7)*rad2deg << ", " << final_state(8)*rad2deg << std::endl;
+              << (float)final_state(6)*rad2deg << ", " << (float)final_state(7)*rad2deg << ", " << (float)final_state(8)*rad2deg << std::endl;
 
     if (!final_state.allFinite()) {
         std::cerr << "\nWarning: final state contains NaN/Inf - simulation diverged." << std::endl;
@@ -102,7 +101,7 @@ int main(int argc, char* argv[]) {
     rk4Solver.free_results();
     if (loop){
         std::cout<<"Press Ctrl+C to Exit\n";
-        std::cin >> argv[0];
+        std::cin >> dt;
     }
     return 0;
 }

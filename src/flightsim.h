@@ -10,7 +10,7 @@ double rad2deg=180.0/pi;
 
 double dt;
 double set_pitch=20*deg2rad;
-
+double set_vel=800;
 //#include <sys/stat.h>
 #include "readxslx.h"
 #include "derivatives.h"

@@ -127,6 +127,8 @@ class rk4{
                 
                 // update the controllers after solving
                 con_obj.pitch_controller(step);
+                con_obj.velocity_controller(step);
+
                 
                 // Log data at this timestep
                 double current_time = (step + 1) * dt;
