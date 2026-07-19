@@ -7,10 +7,16 @@ double deg2rad=pi/180.0;
 double rad2deg=180.0/pi;
 
 #include "read_controls.h"
-
+struct flight_path{
+    double h=40000,v_tot,delta_h_dot,gamma,alpha;
+};
+flight_path str_h;
 double dt;
-double set_pitch=20*deg2rad;
-double set_vel=800;
+double set_pitch=0;
+double set_vel=0;
+double set_alt=0;
+double set_heading=0;
+bool alt_override=false; // overrides altitude loop straight to pitch control
 //#include <sys/stat.h>
 #include "readxslx.h"
 #include "derivatives.h"

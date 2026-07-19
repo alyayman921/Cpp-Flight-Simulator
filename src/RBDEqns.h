@@ -3,16 +3,20 @@
 #include "readxslx.h"
 #include <Eigen/Core>
 #include <Eigen/Dense>
+#include <cmath>
 #include <iostream>
 #include "derivatives.h" 
 
 //float eps = 0.00000011921; // matlab float eps
 double eps = 0.000000000000000222044605;
-
+// struct flight_path{
+//     double h,v_tot,delta_h_dot,gamma,alpha;
+// };
+        
 class RBDsolve{
     private:
         int i;
-        double m, w_dot_state, g, cos_theta;
+        double m, w_dot_state, g, cos_theta,v_tot,z0;
         Eigen::Matrix<double,3,1> v, v_e, v_dot;
         Eigen::Matrix<double,3,1> omega, delta_omega_dot;
         Eigen::Matrix<double,3,1> euler, euler_dot;
@@ -36,7 +40,7 @@ class RBDsolve{
         Eigen::Matrix<double,3,1> M_total;
         
         RBDsolve(aircraft_data ac, Eigen::Matrix<double,4,1>* Controls,bool Autopiloted){
-                this->ac = ac; this->g = ac.g; this->m = ac.m; this->I = ac.Inertia;
+                this->ac = ac; this->g = ac.g; this->m = ac.m; this->I = ac.Inertia;this->z0=ac.z0;
                 this->F_g0 = ac.mg0; this->v = ac.V0;
                 this->omega = ac.omega0; this->euler = ac.euler0;
                 this->SD = ac.SD; this->CD = ac.CD;
@@ -151,21 +155,33 @@ class RBDsolve{
 
             return states_dot;
         }
-        Eigen::Matrix<double,9,1> Verify(Eigen::Matrix<double,9,1> states){
-            double y1 = states(0);
-            double y2 = states(1);
-            double t  = states(2);
+        // Eigen::Matrix<double,9,1> Verify(Eigen::Matrix<double,9,1> states){
+        //     double y1 = states(0);
+        //     double y2 = states(1);
+        //     double t  = states(2);
 
-            Eigen::Matrix<double,9,1> states_dot2;
-            states_dot2.setZero();
-            states_dot2(0) = std::sin(t) + std::cos(y1) + std::cos(y2);
-            states_dot2(1) = std::cos(t) + std::sin(y2) + std::cos(y1);
-            states_dot2(2) = 1.0f;
-            return states_dot2;
-        }
+        //     Eigen::Matrix<double,9,1> states_dot2;
+        //     states_dot2.setZero();
+        //     states_dot2(0) = std::sin(t) + std::cos(y1) + std::cos(y2);
+        //     states_dot2(1) = std::cos(t) + std::sin(y2) + std::cos(y1);
+        //     states_dot2(2) = 1.0f;
+        //     return states_dot2;
+        // }
 
         void updatewdot(double a){
-                w_dot_state = a;
+            w_dot_state = a;
+        }
+        void h_calculation(Eigen::Matrix<double,9,1> y,double dt,flight_path &str_h){
+            str_h.alpha=std::atan2(y(2),y(0));
+            //std::cout<<"alpha = "<< str_h.alpha<<std::endl;
+            str_h.v_tot=std::hypot(y(0),y(2));
+            //std::cout<<"v_tot = "<< str_h.v_tot<<std::endl;
+            str_h.gamma=y(7)-str_h.alpha;
+            //std::cout<<"gamma = "<< str_h.gamma<<std::endl;
+            str_h.delta_h_dot=str_h.v_tot*std::sin(str_h.gamma);
+            //std::cout<<"h dot ="<< str_h.delta_h_dot<<std::endl;
+            str_h.h+=dt*str_h.delta_h_dot;
+            //std::cout<<"current H"<<str_h.h<<" "<< "Current h_dot" <<str_h.delta_h_dot<<std::endl;
         }
         
 

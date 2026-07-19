@@ -1,12 +1,7 @@
 #include "src/flightsim.h"
 
-// bool fileExists(const char* path) {
-//     struct stat buffer;
-//     return (stat(path, &buffer) == 0);
-// }
-
 int main(int argc, char* argv[]) {
-    
+
     // Read aircraft data
     raw_data raw = readxlsx(filename);
     aircraft_data c5a = sorting(raw);
@@ -22,6 +17,7 @@ int main(int argc, char* argv[]) {
             std::cout<<"--help       print this message\n";
             std::cout<<"--loop       prevent the program from exiting after solving\n";
             std::cout<<"--manual     read the control commands from the textfile controls.txt\n";
+            std::cout<<"--pitch     overrides altitude loop straight to pitch control\n";
             return 0;
         }
         for(int i=0;i<argc;i++){
@@ -31,25 +27,25 @@ int main(int argc, char* argv[]) {
                 loop = true;
             }
             if (arg == "--manual") {
-                std::cout<<"Using Autopilot : False\n";
+                std::cout<<"Applying Control actions directly from text file\n";
                 Autopiloted = false;
+            }
+            if (arg == "--pitch") {
+                std::cout<<"Skipping altitude loop\n";
+                alt_override = true;
             }
 
         }
-    }else{
+    }
+        if(alt_override){
         std::cout<<"Pitch Autopilot change (Degrees): ";
         std::cin >> set_pitch; set_pitch=set_pitch*deg2rad+c5a.euler0(1);
+        }else{
+        std::cout<<"Altitude Change (ft): ";
+        std::cin >> set_alt ;set_alt -= c5a.z0;
+        }
         std::cout<<"Velocity Autopilot change (ft/s): ";
         std::cin >> set_vel ;set_vel += c5a.V0(0);
-
-    }
-
-
-    // if (!fileExists(filename)){
-    //     std::cerr << "Error: aircraft data file not found at '" << filename << "'" << std::endl;
-    //     std::cerr << "Run this from the directory containing meta/C5A.xlsx" << std::endl;
-    //     return 1;
-    // }
 
     // Variables to be read from controls file
     double dt = 0.01;      // Default values
@@ -67,7 +63,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Number of steps: " << (int)(tfinal / dt) << std::endl;
 
     // Initialize the controller and keep the control vector the same across files
-    controller c(&Controls,dt,set_pitch, set_vel,Autopiloted);
+    controller c(&Controls, &str_h,dt,set_pitch, set_vel,set_alt,set_heading,alt_override,Autopiloted);
     RBDsolve RBD(c5a, &Controls,Autopiloted);
     //std::cout<<"Controller Didn't Crash it"<<std::endl;
 
@@ -82,7 +78,7 @@ int main(int argc, char* argv[]) {
     // Setup and run RK4 integration
     rk4 rk4Solver(dt, tfinal);
     rk4Solver.resultsPointer(c);
-    Eigen::Matrix<double, 9, 1>* results = rk4Solver.rk4_solver(RBD,c, initial_state);
+    Eigen::Matrix<double, 9, 1>* results = rk4Solver.rk4_solver(RBD,c, str_h, initial_state);
     int N_steps = (int)(tfinal / dt);
     Eigen::Matrix<double, 9, 1> final_state = results[N_steps];
 
@@ -93,7 +89,7 @@ int main(int argc, char* argv[]) {
     //          << final_state(3) << ", " << final_state(4) << ", " << final_state(5) << std::endl;
     std::cout << "Euler angles in Degrees (phi, theta, psi): "
               << (float)final_state(6)*rad2deg << ", " << (float)final_state(7)*rad2deg << ", " << (float)final_state(8)*rad2deg << std::endl;
-
+    std::cout << "Final Altitude: "<<str_h.h<<"\n"; 
     if (!final_state.allFinite()) {
         std::cerr << "\nWarning: final state contains NaN/Inf - simulation diverged." << std::endl;
     }

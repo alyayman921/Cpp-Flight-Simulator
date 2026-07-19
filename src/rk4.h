@@ -18,6 +18,9 @@ class rk4{
         DataLogger accelLogger;
         DataLogger momentLogger; 
         bool loggersInitialized;
+        // struct flight_path{
+        //     double h,v_tot,delta_h_dot,gamma,alpha;
+        // };
 
     public:
         Eigen::Matrix<double,9,1> *state_history;
@@ -72,12 +75,12 @@ class rk4{
             loggersInitialized = true;
             //std::cout << "All loggers initialized successfully!" << std::endl;
         }
-        void resultsPointer(controller &con_obj){
+        void resultsPointer(controller &con_obj){ // should be called reference but idc
             // send the adress of results to controller
             con_obj.rk4_pointers(state_history);
         }
 
-        Eigen::Matrix<double,9,1>* rk4_solver(RBDsolve &RBDobj, controller &con_obj, Eigen::Matrix<double,9,1> states0){
+        Eigen::Matrix<double,9,1>* rk4_solver(RBDsolve &RBDobj, controller &con_obj,flight_path &str_h, Eigen::Matrix<double,9,1> states0){
             Eigen::Matrix<double,9,1> y = states0;
             Eigen::Matrix<double,9,1> k1, k2, k3, k4;
 
@@ -121,6 +124,8 @@ class rk4{
                 // Update w_dot_state using v_dot(2)
                 RBDobj.Equations(y, t + dt);
                 RBDobj.updatewdot(RBDobj.getVDotZ());
+                RBDobj.h_calculation(y,dt,str_h);
+                //std::cout<<"current H"<<str_h.h<<" "<< "Current h_dot" <<str_h.delta_h_dot<<std::endl;
 
                 // Store state
                 state_history[step + 1] = y;
@@ -128,7 +133,7 @@ class rk4{
                 // update the controllers after solving
                 con_obj.pitch_controller(step);
                 con_obj.velocity_controller(step);
-
+                con_obj.altitude_controller(step);
                 
                 // Log data at this timestep
                 double current_time = (step + 1) * dt;

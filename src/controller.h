@@ -14,19 +14,23 @@ class controller{
 			double dservo=0.0; // servo angle
 			double dservo_derivated=0.0; // servo angle rate 
 		};
+		struct prev_store{
+			double state=0.0; 
+			double state_prev=0.0;
+		};
 
 		bool Autopiloted;
+		bool alt_override;
 		float da,de,dth,dr;
 		Eigen::Matrix<double,4,1>* Controls;
 		Eigen::Matrix<double, 9, 1>* results;
 		float y;
 		double dt=0.01;
 		int current_step;
-		//double diffed; // not used
 
 		// Pitch Controller
 		double y_pitch=0.0,yd_pitch=0.0; 
-		double set_pitch=20*3.1415/180;
+		double set_pitch=0.0;
 		servo_states pitch_servo;
 
 		// Velocity Controller
@@ -34,14 +38,25 @@ class controller{
 		double set_vel = 800;
 		servo_states throttle_valve;
 		servo_states engine_lag;
+		flight_path *str_h;
+
+		// Alt Controller
+		double diffed;
+		double y_alt=0.0,yd_alt=0.0; 
+		prev_store r_alt;
+		double rd_alt;
 
 	public:
-		controller(Eigen::Matrix<double,4,1>* Controls,double dt, double set_pitch, double set_vel,bool Autopiloted=true){
+		controller(Eigen::Matrix<double,4,1>* Controls,flight_path *str_h ,
+			double dt, double set_pitch, double set_vel,double set_alt,
+			double set_heading,bool alt_override,bool Autopiloted=true){
 			this->Controls=Controls;
 			this->Autopiloted=Autopiloted;
+			this->alt_override=alt_override;
 			this->dt=dt;
 			this->set_pitch=set_pitch;
 			this->set_vel=set_vel;
+			this->str_h=str_h;
 
 			if (Autopiloted){
 				*Controls={0,0,0,0};
@@ -70,6 +85,16 @@ class controller{
 			}
 			return s.dservo;
 		}
+		double diffrentiate(prev_store &t){
+			if (current_step<1){
+				return 0.00;
+			}else{
+				// (K_n - K_n-1) / dt
+			   diffed= (t.state-t.state_prev)/dt;
+			   t.state_prev=t.state; // update t.state when implementing
+			    return diffed;
+			}
+		}
 
 
 		void pitch_controller(int step){
@@ -94,6 +119,31 @@ class controller{
 					if (de>de_max){de=de_max;}
 					if (de<de_min){de=de_min;}
 					*Controls={da,de,dth,dr};
+					//std::cout<<"Delta Elevator = "<<de<<"\n";
+				}
+			}
+		}
+		void altitude_controller(int step){
+			/*
+			   0.011498 (s+0.3709)
+  				------------------- oh no
+        				(s+10)
+			*/
+			if (Autopiloted&&!alt_override){
+				if (step==1){
+					//yd_alt=-10*y_alt+0.0115*(0+0.371*(str_h.h));
+					r_alt.state=set_alt-str_h->h;
+					rd_alt=diffrentiate(r_alt);
+					}else if(step>1){
+					//std::cout<<"Delta H needed" <<r_alt.state<<"\n";
+					r_alt.state=set_alt-str_h->h;
+					rd_alt=diffrentiate(r_alt);
+					yd_alt=-10*y_alt+0.0115*(rd_alt+0.371*(r_alt.state));
+					y_alt+=yd_alt*dt;
+					set_pitch=y_alt;
+					//std::cout<<"Delta Elevator needed = " <<set_pitch<<"\n";
+					//std::cout<<" "<< "Current h_dot" <<str_h->delta_h_dot<<std::endl;
+					//std::cout<<"current delta H = "<<r_alt.state<<"\n";
 				}
 			}
 		}
@@ -118,21 +168,14 @@ class controller{
 					if (dth>167509){dth=167509;}
 					if (dth<-40800){dth=-40800;}
 					*Controls={da,de,dth,dr};
+					//std::cout<<"current Thrust"<<dth<<"\n";
+
 				}
 			}
 		}
 
-
-		/*
-		double diffrentiate(int current_step,int index){
-			if (current_step==1){
-				return 0.00;
-			}else{
-				// (K_n - K_n-1) / dt
-			   diffed= (results[current_step][index]-results[current_step-1][index])/dt;
-			    return diffed;
-			}
-		}
-		*/
+		
+		
+		
 
 };
