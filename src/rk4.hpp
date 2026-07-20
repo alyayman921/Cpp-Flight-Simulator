@@ -9,7 +9,7 @@ class rk4{
         int i;
         double dt;
         double tfinal;
-        int N_steps;
+        int N_steps,step;
         double *time_v;
         
         // Loggers
@@ -21,14 +21,14 @@ class rk4{
 
     public:
         Eigen::Matrix<double,9,1> *state_history;
-        rk4(double dt, double tfinal) {
+        rk4(double dt, double tfinal,int &step) {
             this->dt = dt;
             this->tfinal = tfinal;
             this->N_steps = (int)(tfinal / dt);
             this->time_v = (double*)malloc(N_steps * sizeof(double));
             this->state_history = (Eigen::Matrix<double,9,1>*)malloc((N_steps+1) * sizeof(Eigen::Matrix<double,9,1>));
             this->loggersInitialized = false;
-
+            this->step=step;
             for (int i = 0; i < N_steps; i++) {
                 time_v[i] = i * dt;
             }
@@ -96,7 +96,7 @@ class rk4{
 
             // update the controllers for the
 
-            for (int step = 0; step < N_steps; step++) {
+            for (step = 0; step < N_steps; step++) {
 
                 double t = step * dt;
                 double t_half = t + dt/2.0f;
@@ -128,7 +128,7 @@ class rk4{
                 state_history[step + 1] = y;
                 
                 // update the controllers after solving
-                con_obj.pitch_controller(step);
+                con_obj.pitch_controller();
                 con_obj.velocity_controller(step);
                 con_obj.altitude_controller(step);
                 

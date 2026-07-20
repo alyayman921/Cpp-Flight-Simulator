@@ -1,11 +1,11 @@
 #pragma once
 #include <Eigen/Core>
 #include <Eigen/Dense>
+#include "tf.hpp"
 extern double deg2rad;
 extern double rad2deg; 
 float de_max=  25 * deg2rad;
 float de_min= -25 * deg2rad;
-
 
 class controller{
 	private:
@@ -26,11 +26,13 @@ class controller{
 		float y;
 		double dt=0.01;
 		int current_step;
+		int step;
 
 		// Pitch Controller
 		double y_pitch=0.0,yd_pitch=0.0; 
 		double set_pitch=0.0;
 		servo_states pitch_servo;
+		transferFunction pitch_tf;
 
 		// Velocity Controller
 		double y_vel=0.0,yd_vel=0.0;
@@ -47,7 +49,7 @@ class controller{
 
 	public:
 		controller(Eigen::Matrix<double,4,1>* Controls,flight_path *str_h ,
-			double dt, double set_pitch, double set_vel,double set_alt,
+			double dt,int &step, double set_pitch, double set_vel,double set_alt,
 			double set_heading,bool alt_override,bool Autopiloted=true){
 			this->Controls=Controls;
 			this->Autopiloted=Autopiloted;
@@ -56,10 +58,9 @@ class controller{
 			this->set_pitch=set_pitch;
 			this->set_vel=set_vel;
 			this->str_h=str_h;
+			this->step=step;
 
-			if (Autopiloted){
-				*Controls={0,0,0,0};
-			}
+			
 		}
 		void rk4_pointers(Eigen::Matrix<double, 9, 1>* results){
 			this->results=results; // take the pointer to results vector, point to it here too
@@ -92,35 +93,33 @@ class controller{
 			    return diffed;
 			}
 		}
-		void pitch_controller(int step){
+		void pitch_controller(){
 			/*
 			  307.35 (1-0.9828z-1)
 			  --------------------
 			        (1+z-1)
 			*/
+			if (Autopiloted&&!step){
+				*Controls={0,0,0,0};
+				double num=1.9948;
+				double den[2]={0.0 ,1.0};
+				transferFunction pitch_tf(1 , 2 , num , den ,step ,dt);
+
+			}
 			if (Autopiloted){
-				this->current_step=step;
-
-				if (step<1){
-					yd_pitch=(set_pitch-results[step][7])*(1.9948); // y dot from drawing, maybe try delta theta instead of theta
-					de=0;
-					}else{
-
-					y_pitch += yd_pitch*dt;
-					yd_pitch = (set_pitch-results[step][7])*(1.9948); // y dot prev, used in next step, where ynow=yprev+yd*dt
-					de= y_pitch - ((results[step][7]*1.734+results[step][4])*1.5236);
-					de=-de; // this is the input to servo tf, from the simulink model 
-					de=servo(pitch_servo, de);
-					if (de>de_max){de=de_max;}
-					if (de<de_min){de=de_min;}
-					*Controls={da,de,dth,dr};
+				y_pitch=pitch_tf.solve((set_pitch-results[step][7]));
+				de=-(y_pitch - ((results[step][7]*1.734+results[step][4])*1.5236));
+				de=servo(pitch_servo, de);
+				if (de>de_max){de=de_max;}
+				if (de<de_min){de=de_min;}
+				*Controls={da,de,dth,dr};
 					//std::cout<<"Delta Elevator = "<<de<<"\n";
 				}
 			}
-		}
+		
 		void altitude_controller(int step){
 			/*
-			   0.011498 (s+0.3709)
+			    0.011498 (s+0.3709)
   				------------------- oh no
         				(s+10)
 			*/

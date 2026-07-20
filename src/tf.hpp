@@ -5,7 +5,7 @@ class transferFunction{
 		double a0,a1; // Numerator coefficients, where the polynomial has the coefficients (a1*s + a0)
 		double b0,b1; // denum coefficients
 		double diffed,dt,y,yd,rd;
-		int *step;
+		int step;
 		int size_num,size_denum; 
 		struct servo_states{
 			double dservo=0.0; // servo angle
@@ -15,10 +15,11 @@ class transferFunction{
 			double state=0.0;
 			double state_prev=0.0;
 		};
-	public:
 		prev_store input_history;
-
-		transferFunction(int size_num,int size_denum,double *num, double *denum,int *step,double dt){
+	public:
+		transferFunction(){}
+		transferFunction(int size_num,int size_denum,double *num, double *denum,int &step,double dt){
+			// general constructor
 			this->size_num= size_num;
 			this->size_denum= size_denum;
 			this->step=step;
@@ -30,6 +31,27 @@ class transferFunction{
 				this->a1=num[1];
 			}else{
 				std::cerr<<"Unsupported num Size, Max = 2\n";
+			}
+			if (size_denum==1){
+				this->b0=denum[0];
+			}else if(size_denum==2){
+				this->b0=denum[0];
+				this->b1=denum[1];
+			}else{
+				std::cerr<<"Unsupported denum Size, Max = 2\n";
+			}
+
+		}
+		transferFunction(int size_num,int size_denum,double num, double *denum,int &step,double dt){
+			// Constructor for simple lag
+			this->size_num= size_num;
+			this->size_denum= size_denum;
+			this->step=step;
+			this->dt=dt;
+			if (size_num==1){
+				this->a0=num;
+			}else{
+				std::cerr<<"This is the simple lag constructor, what even got you here\n";
 			}
 			if (size_denum==1){
 				this->b0=denum[0];

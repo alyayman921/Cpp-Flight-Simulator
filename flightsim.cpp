@@ -1,4 +1,4 @@
-#include "src/flightsim.h"
+#include "src/flightsim.hpp"
 
 int main(int argc, char* argv[]) {
 
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Number of steps: " << (int)(tfinal / dt) << std::endl;
 
     // Initialize the controller and keep the control vector the same across files
-    controller c(&Controls, &str_h,dt,set_pitch, set_vel,set_alt,set_heading,alt_override,Autopiloted);
+    controller c(&Controls, &str_h,dt,step,set_pitch, set_vel,set_alt,set_heading,alt_override,Autopiloted);
     RBDsolve RBD(c5a, &Controls,Autopiloted);
     //std::cout<<"Controller Didn't Crash it"<<std::endl;
 
@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
     
 
     // Setup and run RK4 integration
-    rk4 rk4Solver(dt, tfinal);
+    rk4 rk4Solver(dt, tfinal,step);
     rk4Solver.resultsPointer(c);
     Eigen::Matrix<double, 9, 1>* results = rk4Solver.rk4_solver(RBD,c, str_h, initial_state);
     int N_steps = (int)(tfinal / dt);

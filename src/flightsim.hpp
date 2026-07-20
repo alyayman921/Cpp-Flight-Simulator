@@ -6,13 +6,14 @@ double pi=3.1415926;
 double deg2rad=pi/180.0;
 double rad2deg=180.0/pi;
 
-#include "read_controls.h"
+#include "read_controls.hpp"
 struct flight_path{
     // make the h value the one gotten from xlsx, 
     double h=40000,v_tot,delta_h_dot,alpha,beta,gamma; 
     //also this is not the place to define it
 };
 flight_path str_h;
+int step=0;
 double dt;
 double set_pitch=0;
 double set_vel=0;
