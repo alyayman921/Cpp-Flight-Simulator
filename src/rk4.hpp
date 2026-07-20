@@ -1,9 +1,9 @@
 #pragma once
 
 #include <cstdlib>
-#include "RBDEqns.h"
-#include "logger.h"
-#include "controller.h"
+#include "RBDEqns.hpp"
+#include "logger.hpp"
+#include "controller.hpp"
 class rk4{
     private:
         int i;
@@ -18,9 +18,6 @@ class rk4{
         DataLogger accelLogger;
         DataLogger momentLogger; 
         bool loggersInitialized;
-        // struct flight_path{
-        //     double h,v_tot,delta_h_dot,gamma,alpha;
-        // };
 
     public:
         Eigen::Matrix<double,9,1> *state_history;

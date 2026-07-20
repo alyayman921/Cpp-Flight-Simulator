@@ -8,7 +8,9 @@ double rad2deg=180.0/pi;
 
 #include "read_controls.h"
 struct flight_path{
-    double h=40000,v_tot,delta_h_dot,gamma,alpha;
+    // make the h value the one gotten from xlsx, 
+    double h=40000,v_tot,delta_h_dot,alpha,beta,gamma; 
+    //also this is not the place to define it
 };
 flight_path str_h;
 double dt;
@@ -17,12 +19,12 @@ double set_vel=0;
 double set_alt=0;
 double set_heading=0;
 bool alt_override=false; // overrides altitude loop straight to pitch control
-//#include <sys/stat.h>
 #include "readxslx.h"
-#include "derivatives.h"
-#include "RBDEqns.h"
-#include "rk4.h"
-#include "controller.h"
+#include "derivatives.hpp"
+#include "RBDEqns.hpp"
+#include "rk4.hpp"
+#include "tf.hpp"
+#include "controller.hpp"
 
 // Variables to be read from controls file
 double tfinal;
@@ -31,6 +33,4 @@ const char filename[] = "meta/C5A.xlsx";
 Eigen::Matrix<double, 4, 1> Controls;
 bool Autopiloted=true;
 
-// bool fileExists(const char* path);
-    
 int main(int argc, char* argv[]);

@@ -9,7 +9,6 @@ float de_min= -25 * deg2rad;
 
 class controller{
 	private:
-		
 		struct servo_states{
 			double dservo=0.0; // servo angle
 			double dservo_derivated=0.0; // servo angle rate 
@@ -62,11 +61,9 @@ class controller{
 				*Controls={0,0,0,0};
 			}
 		}
-
 		void rk4_pointers(Eigen::Matrix<double, 9, 1>* results){
 			this->results=results; // take the pointer to results vector, point to it here too
 		}
-
 		double servo(servo_states &s, float input, float t=10){
 			/*
  						output       0.04762  + 0.04762 z-1 	    			10
@@ -95,8 +92,6 @@ class controller{
 			    return diffed;
 			}
 		}
-
-
 		void pitch_controller(int step){
 			/*
 			  307.35 (1-0.9828z-1)
@@ -173,9 +168,30 @@ class controller{
 				}
 			}
 		}
+// -------------------------------------- LATERAL CONTROLLERS ---------------------------------------
+		
+		void roll_controller(int step){
+			/*
+			     PI_Roll 
+			  0.14722 (s+18)
+			  -------------- 
+			        s
 
-		
-		
+				  PD_Roll
+			  121.15 (s+1.3)
+			  --------------
+			      (s+15)
+ 
+			*/
+		}
+		void yaw_controller(int step){
+			/*
+			   damper
+			  0.88711 s
+			  ---------
+			   (s+0.1)
+			*/
+		}
 		
 
 };

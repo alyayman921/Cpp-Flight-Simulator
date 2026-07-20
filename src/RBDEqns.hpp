@@ -5,14 +5,11 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <iostream>
-#include "derivatives.h" 
+#include "derivatives.hpp" 
 
 //float eps = 0.00000011921; // matlab float eps
 double eps = 0.000000000000000222044605;
-// struct flight_path{
-//     double h,v_tot,delta_h_dot,gamma,alpha;
-// };
-        
+
 class RBDsolve{
     private:
         int i;
@@ -175,6 +172,7 @@ class RBDsolve{
             str_h.alpha=std::atan2(y(2),y(0));
             //std::cout<<"alpha = "<< str_h.alpha<<std::endl;
             str_h.v_tot=std::hypot(y(0),y(2));
+            str_h.beta=std::atan2(y(1),str_h.v_tot);
             //std::cout<<"v_tot = "<< str_h.v_tot<<std::endl;
             str_h.gamma=y(7)-str_h.alpha;
             //std::cout<<"gamma = "<< str_h.gamma<<std::endl;
