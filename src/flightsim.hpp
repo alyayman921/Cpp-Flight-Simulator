@@ -14,6 +14,7 @@ struct flight_path{
 };
 flight_path str_h;
 int step=0;
+int* ptrStep=&step;
 double dt;
 double set_pitch=0;
 double set_vel=0;

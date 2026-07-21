@@ -9,7 +9,8 @@ class rk4{
         int i;
         double dt;
         double tfinal;
-        int N_steps,step;
+        int N_steps;
+        int *step;
         double *time_v;
         
         // Loggers
@@ -21,7 +22,7 @@ class rk4{
 
     public:
         Eigen::Matrix<double,9,1> *state_history;
-        rk4(double dt, double tfinal,int &step) {
+        rk4(double dt, double tfinal,int *step) {
             this->dt = dt;
             this->tfinal = tfinal;
             this->N_steps = (int)(tfinal / dt);
@@ -96,9 +97,9 @@ class rk4{
 
             // update the controllers for the
 
-            for (step = 0; step < N_steps; step++) {
+            for (*step = 0; *step < N_steps; (*step)++) {
 
-                double t = step * dt;
+                double t = *step * dt;
                 double t_half = t + dt/2.0f;
                 double t_full = t + dt;
 
@@ -125,15 +126,15 @@ class rk4{
                 //std::cout<<"current H"<<str_h.h<<" "<< "Current h_dot" <<str_h.delta_h_dot<<std::endl;
 
                 // Store state
-                state_history[step + 1] = y;
+                state_history[*step + 1] = y;
                 
                 // update the controllers after solving
                 con_obj.pitch_controller();
-                con_obj.velocity_controller(step);
-                con_obj.altitude_controller(step);
+                con_obj.velocity_controller();
+                con_obj.altitude_controller();
                 
                 // Log data at this timestep
-                double current_time = (step + 1) * dt;
+                double current_time = (*step + 1) * dt;
                 stateLogger.logStates(current_time, y);
                 forceLogger.logForces(current_time, 
                                      RBDobj.getAeroForces(), 

@@ -36,7 +36,7 @@ if a state is to be derived (multiplied by s), for the fisrt time step we set th
 - ~~Most Likely the Servos will not be implemented for now~~ Nevermind I actually Implemented it in 20 minutes or so
 
 ## TODO 
-- [ ] Make a Generalized Transfer Function class.
+- [x] Make a Generalized Transfer Function class.
 - [ ] Attach a rendering GUI for the Simulator.
 - [ ] Deploy controllers to an stm32 based embedded board.
 - [ ] Makefile, maybe publish to AUR?
