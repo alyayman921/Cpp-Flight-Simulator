@@ -5,20 +5,19 @@ class transferFunction{
 		double a0,a1; // Numerator coefficients, where the polynomial has the coefficients (a1*s + a0)
 		double b0,b1; // denum coefficients
 		double diffed,dt,y,yd,rd;
-		int step;
+		int* step;
 		int size_num,size_denum; 
-		struct servo_states{
-			double dservo=0.0; // servo angle
-			double dservo_derivated=0.0; // servo angle rate 
-		};
+
 		struct prev_store{
 			double state=0.0;
-			double state_prev=0.0;
+			double state_prev=0.0; // or diffrentiated in case of servo
 		};
 		prev_store input_history;
+		prev_store servo1;
+		prev_store servo2;
 	public:
 		transferFunction(){}
-		transferFunction(int size_num,int size_denum,double *num, double *denum,int &step,double dt){
+		transferFunction(int size_num,int size_denum,double *num, double *denum,int *step,double dt){
 			// general constructor
 			this->size_num= size_num;
 			this->size_denum= size_denum;
@@ -42,7 +41,7 @@ class transferFunction{
 			}
 
 		}
-		transferFunction(int size_num,int size_denum,double num, double *denum,int &step,double dt){
+		transferFunction(int size_num,int size_denum,double num, double *denum,int *step,double dt){
 			// Constructor for simple lag
 			this->size_num= size_num;
 			this->size_denum= size_denum;
@@ -67,7 +66,7 @@ class transferFunction{
 		double solve(double r){
 			// Simple Lag case
 			if (size_num == 1 && size_denum == 2){
-				if (step<1){
+				if (*step<1){
 					yd=a0*r/b1; // (-b0*y + a0*r)/b1   but y is 0 
 					return 0;
 				}else{
@@ -75,10 +74,11 @@ class transferFunction{
 					yd=(-b0*y+a0*r)/b1;
 					return y;	
 				}
+				return 0;
 			}
 			// Lead-Lag case
 			if (size_num == 2 && size_denum == 2){
-				if (step<1){
+				if (*step<1){
 					input_history.state=r;
 					rd=diffrentiate(input_history);
 					input_history.state_prev=r;
@@ -92,32 +92,13 @@ class transferFunction{
 					yd=(-b0*y+a1*rd+a0*r)/b1;
 					return y;	
 				}
+				return 0;
 			}
-
-
+			return 0;
 		}
 
-
-		// double servo(servo_states &s, float input, float t=10){
-		// 	/*
- 		// 				output       0.04762  + 0.04762 z-1 	    			10
- 		// 	G_Servo= ---------- = --------------------------- ts  0.01 =    ---------- 
-      	// 				input	       1 - 0.9048z-1			   			  s + 10
-
-      	// 	GServoEngine =        0.1  
-  		// 					---------------
-  		// 					    s + 0.1 
-		// 	*/
-		// 	if(current_step<1){
-		// 		s.dservo_derivated=t*(input-s.dservo);
-		// 	}else{
-		// 		s.dservo_derivated=t*(input-s.dservo);
-		// 		s.dservo+=s.dservo_derivated*dt;
-		// 	}
-		// 	return s.dservo;
-		// }
 		double diffrentiate(prev_store &t){
-			if (step<1){
+			if (*step<1){
 				return 0.00;
 			}else{
 				// (K_n - K_n-1) / dt
