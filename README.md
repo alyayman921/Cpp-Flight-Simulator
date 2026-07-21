@@ -2,6 +2,7 @@
 as a continuation to the AER4420 Course in my Final year of aerospace engineering atCcairo University>
 during the course i was tasked to create an autopilot system for the Lockheed Martin's C5A Aircraft using Matlab/Simulink, this is C++ implementation for the same linearized aircraft dynamics around a certain flight condition with the same controllers.
 
+
 > [!WARNING]
 > this model does not approximate the continous time system like matlab would, notice the dynamics change with different time steps.
 
@@ -15,10 +16,6 @@ during the course i was tasked to create an autopilot system for the Lockheed Ma
 
 ![Cpp vs Matlab at 0.001](Documentation/V0.1/CppVsMatlab150@ts0.01.png)
 
-## AI DISCLAIMER
-> [!IMPORTANT]
-> Ai was used in this project to do the logging and the handling of files, it was also used in developing the rk4 solver and linking it to the Rigid Body Dynamics equations.
-> this is a learning project, i'm trying to enhance my C++ skills so there's no point of prompting the ai to do it for me.
 
 
 ## Installing on Linux
@@ -40,3 +37,8 @@ if a state is to be derived (multiplied by s), for the fisrt time step we set th
 - [ ] Attach a rendering GUI for the Simulator.
 - [ ] Deploy controllers to an stm32 based embedded board.
 - [ ] Makefile, maybe publish to AUR?
+
+## AI DISCLAIMER
+> [!IMPORTANT]
+> Ai was used in this project to do the logging and the handling of files, it was also used in developing the rk4 solver and linking it to the Rigid Body Dynamics equations.
+> this is a learning project, i'm trying to enhance my C++ skills so there's no point of prompting the ai to do it for me.

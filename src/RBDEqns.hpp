@@ -36,7 +36,7 @@ class RBDsolve{
         Eigen::Matrix<double,3,1> F_g;
         Eigen::Matrix<double,3,1> M_total;
         
-        RBDsolve(aircraft_data ac, Eigen::Matrix<double,4,1>* Controls,bool Autopiloted){
+        RBDsolve(aircraft_data &ac, Eigen::Matrix<double,4,1>* Controls,bool Autopiloted){
                 this->ac = ac; this->g = ac.g; this->m = ac.m; this->I = ac.Inertia;this->z0=ac.z0;
                 this->F_g0 = ac.mg0; this->v = ac.V0;
                 this->omega = ac.omega0; this->euler = ac.euler0;

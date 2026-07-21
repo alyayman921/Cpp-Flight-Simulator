@@ -7,6 +7,19 @@ double deg2rad=pi/180.0;
 double rad2deg=180.0/pi;
 
 #include "read_controls.hpp"
+
+struct autopilot_inputs{
+    bool alt_override=false; // overrides altitude loop straight to pitch control
+    bool head_override=false; // overrides heading loop straight to roll control
+    double dt=0.01;
+    double set_pitch=0;
+    double set_vel=0;
+    double set_alt=0;
+    double set_heading=0;
+    double set_roll=0;
+};
+autopilot_inputs commands;
+
 struct flight_path{
     // make the h value the one gotten from xlsx, 
     double h=40000,v_tot,delta_h_dot,alpha,beta,gamma; 
@@ -15,12 +28,6 @@ struct flight_path{
 flight_path str_h;
 int step=0;
 int* ptrStep=&step;
-double dt;
-double set_pitch=0;
-double set_vel=0;
-double set_alt=0;
-double set_heading=0;
-bool alt_override=false; // overrides altitude loop straight to pitch control
 #include "readxslx.h"
 #include "derivatives.hpp"
 #include "RBDEqns.hpp"

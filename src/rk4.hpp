@@ -132,6 +132,8 @@ class rk4{
                 con_obj.pitch_controller();
                 con_obj.velocity_controller();
                 con_obj.altitude_controller();
+                con_obj.roll_controller();
+                con_obj.yaw_controller();
                 
                 // Log data at this timestep
                 double current_time = (*step + 1) * dt;
