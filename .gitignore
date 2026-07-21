@@ -7,5 +7,6 @@ Autopilot
 tests*
 test*
 /logs
+xlsxio
 meta/.~lock.C5A.xlsx#
 FlightSimulator

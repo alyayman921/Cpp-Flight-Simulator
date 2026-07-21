@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <cstdlib>
 #include "RBDEqns.hpp"
 #include "logger.hpp"
@@ -18,11 +19,11 @@ class rk4{
         DataLogger forceLogger;
         DataLogger accelLogger;
         DataLogger momentLogger; 
-        bool loggersInitialized;
+        bool loggersInitialized,logging;
 
     public:
         Eigen::Matrix<double,9,1> *state_history;
-        rk4(double dt, double tfinal,int *step) {
+        rk4(double dt, double tfinal,int *step,bool logging) {
             this->dt = dt;
             this->tfinal = tfinal;
             this->N_steps = (int)(tfinal / dt);
@@ -30,6 +31,7 @@ class rk4{
             this->state_history = (Eigen::Matrix<double,9,1>*)malloc((N_steps+1) * sizeof(Eigen::Matrix<double,9,1>));
             this->loggersInitialized = false;
             this->step=step;
+            this->logging=logging;
             for (int i = 0; i < N_steps; i++) {
                 time_v[i] = i * dt;
             }
@@ -83,19 +85,21 @@ class rk4{
             Eigen::Matrix<double,9,1> k1, k2, k3, k4;
 
             // Initialize loggers
-            initializeLoggers();
+            if (logging){
+                initializeLoggers();
+                // Log initial state (t=0)
+                state_history[0] = states0;
+                RBDobj.Equations(y, 0.0);
 
-            // Store initial state
-            state_history[0] = states0;
+                stateLogger.logStates(0.0, y);
+                forceLogger.logForces(0.0, RBDobj.getAeroForces(), RBDobj.getGravForces(), RBDobj.getTotalForces());
+                accelLogger.logWithTime(0.0, RBDobj.getAerodynamicAccel());
+                momentLogger.logMoments(0.0, RBDobj.getTotalMoments());
+            }else{
+                state_history[0] = states0;
+                RBDobj.Equations(y, 0.0);
 
-            // Log initial state (t=0)
-            RBDobj.Equations(y, 0.0);
-            stateLogger.logStates(0.0, y);
-            forceLogger.logForces(0.0, RBDobj.getAeroForces(), RBDobj.getGravForces(), RBDobj.getTotalForces());
-            accelLogger.logWithTime(0.0, RBDobj.getAerodynamicAccel());
-            momentLogger.logMoments(0.0, RBDobj.getTotalMoments());
-
-            // update the controllers for the
+            }
 
             for (*step = 0; *step < N_steps; (*step)++) {
 
@@ -132,9 +136,13 @@ class rk4{
                 con_obj.pitch_controller();
                 con_obj.velocity_controller();
                 con_obj.altitude_controller();
+                con_obj.roll_controller();
+                con_obj.yaw_controller();
                 
                 // Log data at this timestep
                 double current_time = (*step + 1) * dt;
+                if (logging){
+
                 stateLogger.logStates(current_time, y);
                 forceLogger.logForces(current_time, 
                                      RBDobj.getAeroForces(), 
@@ -142,6 +150,7 @@ class rk4{
                                      RBDobj.getTotalForces());
                 accelLogger.logWithTime(current_time, RBDobj.getAerodynamicAccel());
                 momentLogger.logMoments(current_time, RBDobj.getTotalMoments());
+                }
 
 
             }
@@ -154,9 +163,11 @@ class rk4{
             free(state_history);
             // Loggers will close automatically in their destructor
             // But you can explicitly close them if needed
-            stateLogger.close();
-            forceLogger.close();
-            accelLogger.close();
-            momentLogger.close();
+            if (logging){
+                stateLogger.close();
+                forceLogger.close();
+                accelLogger.close();
+                momentLogger.close();
+            }
         }
 };
