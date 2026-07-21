@@ -11,13 +11,15 @@ int main(int argc, char* argv[]) {
         std::string arg = argv[1];
         if (arg == "--help") {
             std::cout<< "\nFlight Simulator for Lockheed Martin's C5A Aircraft\n";
-            std::cout<< "Run the Simulator with the supported input arguments like \"./FlightSim --arg\"\n\n";
+            std::cout<< "Run the Simulator with the supported input arguments like \"./FlightSim --arg\n";
+            std::cout<< "Run the Simulator with no argumen\n\n";
             std::cout<<"Arguments    Usage\n";
             std::cout<<"---------    ---------------------------------------------------------\n";
             std::cout<<"--help       print this message\n";
             std::cout<<"--loop       prevent the program from exiting after solving\n";
             std::cout<<"--manual     read the control commands from the textfile controls.txt\n";
             std::cout<<"--pitch      overrides altitude loop straight to pitch control\n";
+            std::cout<<"--roll       overrides heading loop straight to roll control\n";
             return 0;
         }
         for(int i=0;i<argc;i++){
@@ -32,20 +34,31 @@ int main(int argc, char* argv[]) {
             }
             if (arg == "--pitch") {
                 std::cout<<"Skipping altitude loop\n";
-                alt_override = true;
+                commands.alt_override = true;
+            }
+            if (arg == "--roll") {
+                std::cout<<"Skipping heading loop\n";
+                commands.head_override = true;
             }
 
         }
     }
-        if(alt_override){
+        if(commands.alt_override){
         std::cout<<"Pitch Autopilot change (Degrees): ";
-        std::cin >> set_pitch; set_pitch=set_pitch*deg2rad;//+c5a.euler0(1);
+        std::cin >> commands.set_pitch; commands.set_pitch=commands.set_pitch*deg2rad;
         }else{
         std::cout<<"Altitude Change (ft): ";
-        std::cin >> set_alt ;set_alt -= c5a.z0;
+        std::cin >> commands.set_alt ;commands.set_alt -= c5a.z0;
+        }
+        if(commands.head_override){
+        std::cout<<"Roll Autopilot change (Degrees): ";
+        std::cin >> commands.set_roll; commands.set_roll=commands.set_roll*deg2rad;
+        }else{
+        std::cout<<"Heading Change (Degrees): ";
+        std::cin >> commands.set_heading; commands.set_heading=commands.set_heading*deg2rad;
         }
         std::cout<<"Velocity Autopilot change (ft/s): ";
-        std::cin >> set_vel ;set_vel += c5a.V0(0);
+        std::cin >> commands.set_vel ;commands.set_vel += c5a.V0(0);
 
     // Variables to be read from controls file
     double dt = 0.01;      // Default values
@@ -63,12 +76,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Number of steps: " << (int)(tfinal / dt) << std::endl;
 
     // Initialize the controller
-    controller c(&Controls, &str_h,dt,&step,set_pitch, set_vel,set_alt,set_heading,alt_override,Autopiloted);
+    controller c(&Controls,&c5a, &str_h,dt,&step,&commands,Autopiloted);
     RBDsolve RBD(c5a, &Controls,Autopiloted);
-    // Setup and run RK4 integration
-    rk4 rk4Solver(dt, tfinal,&step);
-    rk4Solver.resultsPointer(c);
 
+    // Setup and run RK4 integration
+    rk4 rk4Solver(dt, tfinal,&step,logging);
+    rk4Solver.resultsPointer(c);
 
     // Initial state vector: [uvw, pqr, euler(3)]
     Eigen::Matrix<double, 9, 1> initial_state;
@@ -76,7 +89,7 @@ int main(int argc, char* argv[]) {
                       c5a.omega0(0), c5a.omega0(1), c5a.omega0(2),
                       c5a.euler0(0), c5a.euler0(1), c5a.euler0(2);
     
-
+    // Begin Solving
     Eigen::Matrix<double, 9, 1>* results = rk4Solver.rk4_solver(RBD,c, str_h, initial_state);
     int N_steps = (int)(tfinal / dt);
     Eigen::Matrix<double, 9, 1> final_state = results[N_steps];
