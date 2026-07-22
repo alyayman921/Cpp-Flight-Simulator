@@ -101,6 +101,8 @@ class rk4{
 
             }
 
+            std::cout<<"<Simulation Progress> \n";
+            int progress_percent=0;
             for (*step = 0; *step < N_steps; (*step)++) {
 
                 double t = *step * dt;
@@ -151,8 +153,19 @@ class rk4{
                 accelLogger.logWithTime(current_time, RBDobj.getAerodynamicAccel());
                 momentLogger.logMoments(current_time, RBDobj.getTotalMoments());
                 }
-
-
+                // Simulation Progress animation
+                if(*step%10==0){
+                    progress_percent=1+((float)*step/(float)N_steps)*20;
+                    std::cout<<"[";
+                    int j,k;
+                    for (j=0;j<progress_percent;j++){
+                        std::cout<<"|";
+                    }
+                    for (k=20-j;k>0;k--){
+                        std::cout<<" ";
+                    }
+                        std::cout<<"]\r";
+                    }
             }
 
             return state_history;
