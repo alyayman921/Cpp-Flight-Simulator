@@ -6,9 +6,9 @@ slprj/
 Autopilot
 tests*
 test*
-/logs
-xlsxio
+logs/
+xlsxio/
 meta/.~lock.C5A.xlsx#
 FlightSimulator
-stm/
+stm
 #.gitignore
