@@ -106,23 +106,15 @@ class controller{
 			}
 		
 		void altitude_controller(){
-			/*
-			    0.011498 (s+0.3709)
-  				------------------- oh no
-        				(s+10)
-			*/
+				//for a large value of altitude set
+				// you have to feed the controller multiple gradual steps
+				// Damn you, Non LTI Model
 			if (Autopiloted&&!(commands->alt_override)){
-					y_alt=alt_tf.solve(((commands->set_alt)-str_h->h));
+				y_alt=alt_tf.solve(((commands->set_alt)-str_h->h));
 					commands->set_pitch=y_alt;
-				}
 			}
 
 		void velocity_controller(){
-			/*
-			    1549.1 (s+0.008082)
-  				------------------- = 1549.1 + 125.2/s
-           				s
-			*/
 			if (Autopiloted){
 				y_vel=vel_tf.solve(((commands->set_vel)-results[*step][0]));
 				dth=throttle_valve.solve(y_vel);
@@ -130,45 +122,24 @@ class controller{
 				if (dth>dth_max){dth=dth_max;}
 				if (dth<dth_min){dth=dth_min;}
 				*Controls={da,de,dth,dr};
-				//std::cout<<"current Thrust"<<dth<<"\n";
 			}
 		}
 // -------------------------------------- LATERAL CONTROLLERS ---------------------------------------
 		
 		void roll_controller(){
-			/*
-			     PI_Roll 
-			  0.14722 (s+18)
-			  -------------- 
-			        s
-
-				  PD_Roll
-			  121.15 (s+1.3)
-			  --------------
-			      (s+15)
- 
-			*/
 			da=PI_Roll.solve(((commands->set_roll)-results[*step][6]))-PD_Roll.solve(results[*step][6]);
 			da=roll_servo.solve(da);
 			*Controls={da,de,dth,dr};
 		}
 		void yaw_controller(){
-			/*
-			   damper
-			  0.88711 s
-			  ---------
-			   (s+0.1)
-			*/
 			if(!(commands->head_override)){
-				
-			coordinated_roll=((commands->set_heading)-results[*step][8])*(results[0][0])/ac->g/10;
-			if (coordinated_roll>25){coordinated_roll=25;}
-			if (coordinated_roll<-25){coordinated_roll=-25;}
-			commands->set_roll=coordinated_roll;
-			//roll_controller();
-			dr=yaw_damper.solve(results[*step][5]);
-			dr=yaw_servo.solve(dr);
-			*Controls={da,de,dth,dr};
+				coordinated_roll=((commands->set_heading)-results[*step][8])*(results[0][0])/ac->g/10;
+				if (coordinated_roll>25){coordinated_roll=25;}
+				if (coordinated_roll<-25){coordinated_roll=-25;}
+				commands->set_roll=coordinated_roll;
+				dr=yaw_damper.solve(results[*step][5]);
+				dr=yaw_servo.solve(dr);
+				*Controls={da,de,dth,dr};
 			}
 
 		}
