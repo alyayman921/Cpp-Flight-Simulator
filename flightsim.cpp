@@ -18,6 +18,7 @@ int main(int argc, char* argv[]) {
             std::cout<<"--help       print this message\n";
             std::cout<<"--loop       prevent the program from exiting after solving\n";
             std::cout<<"--manual     read the control commands from the textfile controls.txt\n";
+            std::cout<<"--mcu        Use Controller from Micro Controller\n";
             std::cout<<"--pitch      overrides altitude loop straight to pitch control\n";
             std::cout<<"--roll       overrides heading loop straight to roll control\n";
             return 0;
