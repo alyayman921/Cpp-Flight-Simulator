@@ -1,55 +1,106 @@
+/* USER CODE BEGIN Header */
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
 #include <stdio.h>
 #include <string.h>
 
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
 volatile uint32_t seconds_counter = 0;
-char* string="Watashiwa Yoshikagi kira\r\n";
-int string_finished=0;
-int i=0;
+/* USER CODE END PV */
+
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM1_Init(void);
+/* USER CODE BEGIN PFP */
+/* USER CODE END PFP */
 
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
 
+  /* USER CODE BEGIN 1 */
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
+
+  /* USER CODE BEGIN Init */
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
   SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USB_DEVICE_Init();
   MX_TIM1_Init();
+  /* USER CODE BEGIN 2 */
 
+  /* Give the host a moment to finish enumerating the CDC device
+     before we start transmitting */
   HAL_Delay(1000);
 
-  CDC_Transmit_FS((uint8_t *)"Works!\r\n", 9);
+  /* Quick one-shot sanity check: if this string never shows up in
+     your terminal, the problem is USB enumeration/transmit itself,
+     not the timer interrupt below. */
+  CDC_Transmit_FS((uint8_t *)"USB CDC ready\r\n", 15);
 
+  /* Start TIM1 in interrupt mode so we get a periodic tick to
+     trigger USB CDC transmissions */
   HAL_TIM_Base_Start_IT(&htim1);
 
-  while (1){
-    i=0;
-    while(string_finished==0){
-      // if(string[i]!="\0"){
-      if(i<27){
-        CDC_Transmit_FS((uint8_t*)string[i],1);
-        i++;
-      }else{
-        string_finished=1;
-      }
-    }
-    //CDC_Transmit_FS((uint8_t *)string, 25);
-    // New String to Send
-    string_finished=0;
-    HAL_Delay(500);
-    
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
   }
+  /* USER CODE END 3 */
 }
 
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -92,16 +143,26 @@ void SystemClock_Config(void)
   }
 }
 
-
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_TIM1_Init(void)
 {
 
+  /* USER CODE BEGIN TIM1_Init 0 */
+  /* USER CODE END TIM1_Init 0 */
 
   TIM_SlaveConfigTypeDef sSlaveConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
+  /* USER CODE BEGIN TIM1_Init 1 */
+  /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-
+  /* TIM1 is on APB2, whose clock is not divided (APB2CLKDivider = DIV1),
+     so TIM1's clock equals SYSCLK = 72 MHz.
+     Prescaler 7199 + Period 9999 -> 72MHz / 7200 / 10000 = 1 Hz interrupt */
   htim1.Init.Prescaler = 7199;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 9999;
@@ -112,7 +173,8 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-
+  /* Disabled external slave-mode triggering so TIM1 free-runs on its
+     own internal clock instead of waiting on ITR0 */
   sSlaveConfig.SlaveMode = TIM_SLAVEMODE_DISABLE;
   sSlaveConfig.InputTrigger = TIM_TS_ITR0;
   if (HAL_TIM_SlaveConfigSynchro(&htim1, &sSlaveConfig) != HAL_OK)
@@ -125,18 +187,37 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN TIM1_Init 2 */
+  /* USER CODE END TIM1_Init 2 */
 
 }
 
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_GPIO_Init(void)
 {
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
+  /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
+/* USER CODE BEGIN 4 */
 
+/**
+  * @brief  TIM period elapsed callback (fires every 1 second for TIM1).
+  *         Sends a simple text message over the USB CDC virtual COM port.
+  * @param  htim: TIM handle
+  * @retval None
+  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM1)
@@ -155,6 +236,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
 }
 
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
