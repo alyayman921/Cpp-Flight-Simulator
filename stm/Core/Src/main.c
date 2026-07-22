@@ -1,83 +1,30 @@
-/* USER CODE BEGIN Header */
-/* USER CODE END Header */
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
 #include <stdio.h>
 #include <string.h>
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim1;
 
-/* USER CODE BEGIN PV */
 volatile uint32_t seconds_counter = 0;
-/* USER CODE END PV */
 
-/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM1_Init(void);
-/* USER CODE BEGIN PFP */
-/* USER CODE END PFP */
 
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-/* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void)
 {
-
-  /* USER CODE BEGIN 1 */
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-  /* USER CODE BEGIN Init */
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USB_DEVICE_Init();
   MX_TIM1_Init();
-  /* USER CODE BEGIN 2 */
 
-  /* Give the host a moment to finish enumerating the CDC device
-     before we start transmitting */
   HAL_Delay(1000);
 
-  /* Quick one-shot sanity check: if this string never shows up in
-     your terminal, the problem is USB enumeration/transmit itself,
-     not the timer interrupt below. */
+
   CDC_Transmit_FS((uint8_t *)"USB CDC ready\r\n", 15);
 
   /* Start TIM1 in interrupt mode so we get a periodic tick to
@@ -90,8 +37,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-
+    CDC_Transmit_FS((uint8_t *)"Fellas In Paris\r\n", 17);
+    HAL_Delay(500);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
