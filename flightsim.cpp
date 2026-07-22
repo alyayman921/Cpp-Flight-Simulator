@@ -64,8 +64,8 @@ int main(int argc, char* argv[]) {
     double dt = 0.01;      // Default values
     double tfinal = 100.0;
 
-    if (!readControlsFromFile("controls.txt", Controls, dt, tfinal)) {
-        std::cerr << "Failed to read controls. Using defaults..." << std::endl;
+    if (!readControlsFromFile("meta/controls.txt", Controls, dt, tfinal)) {
+        std::cerr << "Failed to read meta/controls.txt, Using defaults..." << std::endl;
         Controls << 0.0, 0.0, 1000.0, 0.05;
         dt = 0.01;
         tfinal = 100.0;
