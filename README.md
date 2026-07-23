@@ -18,6 +18,7 @@ git clone https://github.com/alyayman921/Cpp-Flight-Simulator.git && cd Cpp-Flig
 ```bash
 sudo apt update && sudo apt install libeigen3-dev # or install via your distro's package manager
 ```
+### **Now you can either run the install.sh, or**
 
 **Clone and make Dependancies**
 ```bash
