@@ -5,7 +5,6 @@
 TIM_HandleTypeDef htim1;
 
 volatile uint32_t seconds_counter = 0;
-// extern USBD_HandleTypeDef hUsbDeviceFS;
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -45,7 +44,7 @@ int main(void)
       HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
       number+=1;
       CDC_Transmit_FS(rx_rec, 1);
-      HAL_Delay(100);
+      HAL_Delay(10);
     }
   }
 }
