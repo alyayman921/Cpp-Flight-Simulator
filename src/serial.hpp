@@ -12,6 +12,7 @@ private:
     char data_byte; // Char variable to store data coming from the serial port.
     static const int size=20;
     char string[size]={0};
+    size_t ms_timeout = 250;
     SerialPort serial_port;
 public:
     serial(){}
@@ -41,13 +42,33 @@ public:
             string[0]='0';
         }
     }
+    char read(){
+        try{
+            serial_port.ReadByte(data_byte, ms_timeout) ;
+        }
+
+        catch (const ReadTimeout&)
+        {
+        }
+        return data_byte;
+    }
+    char write(char* a){
+        try{
+            serial_port.Write(a) ;
+        }
+
+        catch (const ReadTimeout&)
+        {
+        }
+        return data_byte;
+    }
     char* read_string(){
         int i=0;
         empty_string();
         while(!serial_port.IsDataAvailable()){
             usleep(10) ;
         }
-        size_t ms_timeout = 250 ;
+        
         try{
             do{
                 serial_port.ReadByte(data_byte, ms_timeout) ;

@@ -1,51 +1,54 @@
 #include "main.h"
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
-#include <stdio.h>
-#include <string.h>
 
 TIM_HandleTypeDef htim1;
 
 volatile uint32_t seconds_counter = 0;
+// extern USBD_HandleTypeDef hUsbDeviceFS;
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM1_Init(void);
+extern int rx_receive(uint8_t *out);
+
+uint8_t number=0;
+uint8_t* rx_rec=&number;
 
 int main(void)
 {
-  HAL_Init();
-
-  SystemClock_Config();
-  MX_GPIO_Init();
-  MX_TIM1_Init();
+  HAL_Init();SystemClock_Config();
+  MX_GPIO_Init();MX_TIM1_Init();
 
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  // Pull USB Pin 12 so it resets normally
   GPIO_InitStruct.Pin   = GPIO_PIN_12;
   GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull  = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
   HAL_Delay(200);
-
   MX_USB_DEVICE_Init();
   HAL_Delay(1000);
+  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 
-  CDC_Transmit_FS((uint8_t *)"USB CDC ready\r\n", 15);
-
-  /* Start TIM1 in interrupt mode so we get a periodic tick to
-     trigger USB CDC transmissions */
+  //CDC_Transmit_FS((uint8_t *)"Code Started\n", 13);
   HAL_TIM_Base_Start_IT(&htim1);
 
   while (1)
   {
-    CDC_Transmit_FS((uint8_t *)"Fellas In Paris\r\n", 17);
-    HAL_Delay(500);
+    if (rx_receive(rx_rec)){; // receive
+      HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+      number+=1;
+      CDC_Transmit_FS(rx_rec, 1);
+      HAL_Delay(100);
+    }
   }
 }
-
 
 
 void SystemClock_Config(void)
@@ -89,14 +92,9 @@ void SystemClock_Config(void)
 static void MX_TIM1_Init(void)
 {
 
-  /* USER CODE BEGIN TIM1_Init 0 */
-  /* USER CODE END TIM1_Init 0 */
-
   TIM_SlaveConfigTypeDef sSlaveConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
-  /* USER CODE BEGIN TIM1_Init 1 */
-  /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
   /* TIM1 is on APB2, whose clock is not divided (APB2CLKDivider = DIV1),
      so TIM1's clock equals SYSCLK = 72 MHz.
@@ -129,26 +127,20 @@ static void MX_TIM1_Init(void)
 
 static void MX_GPIO_Init(void)
 {
-  __HAL_RCC_GPIOD_CLK_ENABLE();
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-}
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  if (htim->Instance == TIM1)
-  {
-    char tx_buf[32];
-    int len;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
-    seconds_counter++;
-    len = snprintf(tx_buf, sizeof(tx_buf), "Tick: %lu\r\n",
-                    (unsigned long)seconds_counter);
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-    /* CDC_Transmit_FS returns USBD_OK (0) on success. If the buffer
-       is busy (previous transfer still in progress) it returns
-       USBD_BUSY; you can retry or simply drop this tick's message. */
-    CDC_Transmit_FS((uint8_t *)tx_buf, len);
-  }
 }
 
 void Error_Handler(void)
