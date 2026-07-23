@@ -90,6 +90,7 @@ int main(int argc, char* argv[]) {
                       c5a.euler0(0), c5a.euler0(1), c5a.euler0(2);
     
     // Begin Solving
+    auto prev =std::chrono::steady_clock::now();
     Eigen::Matrix<double, 9, 1>* results = rk4Solver.rk4_solver(RBD,c, str_h, initial_state);
     int N_steps = (int)(tfinal / dt);
     Eigen::Matrix<double, 9, 1> final_state = results[N_steps];
@@ -105,6 +106,9 @@ int main(int argc, char* argv[]) {
     if (!final_state.allFinite()) {
         std::cerr << "\nWarning: final state contains NaN/Inf - simulation diverged." << std::endl;
     }
+    auto now =std::chrono::steady_clock::now();
+    const std::chrono::duration<double> elapsed_seconds{now-prev};
+    std::cout<<"Simulation Finished in  "<<elapsed_seconds<<" With a RTF " <<(double)tfinal/elapsed_seconds.count()<<std::endl;
 
     rk4Solver.free_results();
     if (loop){

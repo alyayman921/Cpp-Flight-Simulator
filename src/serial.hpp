@@ -1,17 +1,19 @@
+#pragma once
 #include <libserial/SerialPort.h>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <unistd.h>
-
+#include <cstdint>
 using namespace LibSerial ;
 
 class serial{
 private:
     //constexpr const char* const SERIAL_PORT_1 = "/dev/ttyACM0" ;
-    char data_byte; // Char variable to store data coming from the serial port.
+    uint8_t data_byte; // Char variable to store data coming from the serial port.
     static const int size=20;
     char string[size]={0};
+    size_t ms_timeout = 5;
     SerialPort serial_port;
 public:
     serial(){}
@@ -36,18 +38,51 @@ public:
         // Set the number of stop bits.
         this->serial_port.SetStopBits(StopBits::STOP_BITS_1) ;
     }
+    void close(){
+        serial_port.Close();
+    }
     void empty_string(){
         for (int i=0;i<size;i++){
             string[0]='0';
         }
     }
+    char read(){
+        try{
+            serial_port.ReadByte(data_byte, ms_timeout) ;
+        }
+
+        catch (const ReadTimeout&)
+        {
+        }
+        return data_byte;
+    }
+    char write(char a){
+        try{
+            serial_port.WriteByte(a) ;
+        }
+
+        catch (const ReadTimeout&)
+        {
+        }
+        return data_byte;
+    }
+    char write_string(char* a){
+        try{
+            serial_port.Write(a) ;
+        }
+
+        catch (const ReadTimeout&)
+        {
+        }
+        return data_byte;
+    }
     char* read_string(){
         int i=0;
         empty_string();
         while(!serial_port.IsDataAvailable()){
-            usleep(10) ;
+            usleep(ms_timeout) ;
         }
-        size_t ms_timeout = 250 ;
+        
         try{
             do{
                 serial_port.ReadByte(data_byte, ms_timeout) ;
