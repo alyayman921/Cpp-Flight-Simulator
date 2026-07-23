@@ -108,7 +108,9 @@ int main(int argc, char* argv[]) {
     }
     auto now =std::chrono::steady_clock::now();
     const std::chrono::duration<double> elapsed_seconds{now-prev};
-    std::cout<<"Simulation Finished in  "<<elapsed_seconds<<" With a RTF " <<(double)tfinal/elapsed_seconds.count()<<std::endl;
+    float elapsed= (float) elapsed_seconds.count();
+    float RTF = (double)tfinal/elapsed_seconds.count();
+    std::cout<<"Simulation Finished in "<<elapsed<<" With a RTF " <<RTF<<std::endl;
 
     rk4Solver.free_results();
     if (loop){
