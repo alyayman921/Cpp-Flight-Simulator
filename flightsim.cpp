@@ -1,4 +1,5 @@
 #include "flightsim.hpp"
+#include "inc/flightsim.hpp"
 
 int main(int argc, char* argv[]) {
 /*------------------------- Import Files ----------------------------------------*/
@@ -28,6 +29,7 @@ int main(int argc, char* argv[]) {
             std::cout<< "--manual     {Currently Disabled}\n";
             std::cout<< "--pitch      overrides altitude loop straight to pitch control\n";
             std::cout<< "--roll       overrides heading loop straight to roll control\n\n";
+            std::cout<< "--xp         X-Plane 12 Mode\n";
             std::cout<< "---------    -------- STM32F103C8T + Linux Only ----------------------\n";
             std::cout<< "\n";
             std::cout<< "--ext        use external Micorcontroller as aircraft controller\n";
@@ -39,9 +41,11 @@ int main(int argc, char* argv[]) {
             arg=argv[i];
             if (arg == "test"){
               mode='s'; // skip
-              commands.set_alt=1000-c5a.z0;
-              commands.set_heading=30*deg2rad;
-              commands.set_vel=80;commands.set_vel += c5a.V0.data[0][0];
+              xplane=true;
+              tfinal=150;
+              commands.set_alt=0000-c5a.z0;
+              commands.set_heading=90*deg2rad;
+              commands.set_vel=00;commands.set_vel += c5a.V0.data[0][0];
               std::cout<<"alt set: "<<commands.set_alt<<'\n';
               std::cout<<"heading set: "<<commands.set_heading*rad2deg<<'\n';
               std::cout<<"vel set: "<<commands.set_vel<<'\n';
@@ -82,13 +86,16 @@ int main(int argc, char* argv[]) {
                 commands.onboard= true;
                 commands.ext_controller = true;
             }
+            if (arg == "--xp") {
+                std::cout<<"X Plane 12 Mode";
+                xplane=true;
+            }
         }
     }
 
     if(mode!='s'){ // If not test mode
         if(commands.alt_override){
             std::cout<<"Pitch Autopilot change (Degrees): ";
-            std::cout<<"hi ya bibinos";
             std::cin >> commands.set_pitch; commands.set_pitch=commands.set_pitch*deg2rad;
         }else{
             std::cout<<"Altitude Change (ft): ";
@@ -136,7 +143,21 @@ int main(int argc, char* argv[]) {
         c.onboard_sim();
     } else
 #endif
-
+    // Try 100 Times to connect, fixes issue with long lat reading crashing the simulation
+    if (xplane){
+      int i=0;
+      printf("Attempting Connection to XPLANE");
+      for(i=0;i<100;i++){
+        if(!xpc.initxpc()){
+          if(i!=0){
+          std::cout<<"Connected to X-Plane 12 after "<<i+1<<" trials"<<'\n';}
+          break;
+      }
+      }
+    if(i==100) printf("Error establishing connecting. Double Check your UDP Settings and "
+           "enable Read Write for data, and check if the xpc plugin is added "
+           "successfully.");
+    }
 
 /*------------------------- Solving Linear ----------------------------------------*/
   std::cout<<"\n<Simulation Progress> \n";
@@ -166,6 +187,10 @@ int main(int argc, char* argv[]) {
     for(step;step<N_steps;step++){
       RBD.rk4Solver();
       c.updateControllers();
+
+      if(xplane){
+        xpc.updateXplane(results, str_h, Controls);
+      }
     if(step%10==0){
         progress_percent=1+((float)step/(float)N_steps)*20;
         std::cout<<"[";

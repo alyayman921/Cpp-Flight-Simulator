@@ -1,5 +1,11 @@
 #include "RBDEqns.hpp"
 
+float lon, lat;
+// float lon0=-0.454295;
+// float lat0=51.470020; // LDN HEATHROW, get from xplane later
+float lon0=30.90;
+float lat0=30.11; // Giza Sphinx Airport
+
 static void cross3(struct Matrix* out, struct Matrix* a, struct Matrix* b) {
     out->data[0][0] = a->data[1][0] * b->data[2][0] - a->data[2][0] * b->data[1][0];
     out->data[1][0] = a->data[2][0] * b->data[0][0] - a->data[0][0] * b->data[2][0];
@@ -66,6 +72,10 @@ RBDSolve::RBDSolve(aircraft_data &ac, struct Matrix* Controls, flight_path *str_
         this->F_grav = vector(3);
         this->F_b = vector(3);
         this->M_total = vector(3);
+        position = vector(3);
+        temp = vector(3);
+        mat_set_zero(&position);
+        position.data[2][0]=-ac.z0;
         mat_set_zero(&this->F_aero); mat_set_zero(&this->F_grav);
         mat_set_zero(&this->F_b);    mat_set_zero(&this->M_total);
         str_h->h = -ac.z0;
@@ -78,9 +88,25 @@ RBDSolve::~RBDSolve(){
     mat_free_memory(&Aerodynamic_accel); mat_free_memory(&delta_v); mat_free_memory(&delta_omega);
     mat_free_memory(&delta_F); mat_free_memory(&delta_M); mat_free_memory(&y); mat_free_memory(&y_dot);
     mat_free_memory(&delta_y); mat_free_memory(&F_aero); mat_free_memory(&F_grav);
-    mat_free_memory(&F_b); mat_free_memory(&F_g0); mat_free_memory(&M_total);
+    mat_free_memory(&F_b); mat_free_memory(&F_g0); mat_free_memory(&M_total);mat_free_memory(&temp);
 }
+void RBDSolve::ItoENED(){
+    R.data[0][0] =  std::cos(euler.data[1][0]) * std::cos(euler.data[2][0]);
+    R.data[0][1] =  std::sin(euler.data[0][0]) * std::sin(euler.data[1][0]) * std::cos(euler.data[2][0])
+                  - std::cos(euler.data[0][0]) * std::sin(euler.data[2][0]);
+    R.data[0][2] =  std::cos(euler.data[0][0]) * std::sin(euler.data[1][0]) * std::cos(euler.data[2][0])
+                  + std::sin(euler.data[0][0]) * std::sin(euler.data[2][0]);
 
+    R.data[1][0] =  std::cos(euler.data[1][0]) * std::sin(euler.data[2][0]);
+    R.data[1][1] =  std::sin(euler.data[0][0]) * std::sin(euler.data[1][0]) * std::sin(euler.data[2][0])
+                  + std::cos(euler.data[0][0]) * std::cos(euler.data[2][0]);
+    R.data[1][2] =  std::cos(euler.data[0][0]) * std::sin(euler.data[1][0]) * std::sin(euler.data[2][0])
+                  - std::sin(euler.data[0][0]) * std::cos(euler.data[2][0]);
+
+    R.data[2][0] = -std::sin(euler.data[1][0]);
+    R.data[2][1] =  std::sin(euler.data[0][0]) * std::cos(euler.data[1][0]);
+    R.data[2][2] =  std::cos(euler.data[0][0]) * std::cos(euler.data[1][0]);
+}
 void RBDSolve::RBDEquations(struct Matrix y, struct Matrix* out){
     for (i = 0; i < 3; i++){
         v.data[i][0] = y.data[i][0];
@@ -163,6 +189,11 @@ void RBDSolve::RBDEquations(struct Matrix y, struct Matrix* out){
     mat_copy(out, &y_dot);
 }
 
+void RBDSolve::long_lat(){
+  lon = lat0 + (position.data[0][0]*0.308/ 6371000) * rad2deg; // altitude in feet ÷ Earth radius in km * ft->m
+  lat = lon0 + (position.data[1][0]*0.308 / (6371000 * std::cos(lat * deg2rad))) * rad2deg;; // y/x in NED Earth Frame
+}
+
 void RBDSolve::rk4Solver(){
     mat_copy(&y, states);
     struct Matrix k1 = vector(9); RBDEquations(y, &k1);
@@ -189,6 +220,13 @@ void RBDSolve::rk4Solver(){
     mat_scalar_mul(&sum, &sum, (float)dt / 6.0f);
     mat_add(&y, &y, &sum);
 
+    // position calc
+    mat_scalar_mul(&temp, &v, dt);
+    mat_mult(R, temp, &temp);
+    mat_add(&position, &position, &temp);
+    RBDSolve::long_lat();
+
+    // what is the ai doing bro
     mat_free_memory(&k1); mat_free_memory(&k2); mat_free_memory(&k3); mat_free_memory(&k4);
     mat_free_memory(&tmp); mat_free_memory(&y2); mat_free_memory(&y3); mat_free_memory(&y4); mat_free_memory(&sum);
 

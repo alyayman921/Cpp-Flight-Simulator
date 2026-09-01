@@ -1,0 +1,4 @@
+CompileFlags:
+  Add:
+    -I/home/aly/flightsim/inc
+    -I/home/aly/flightsim/src

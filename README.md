@@ -1,11 +1,9 @@
 # Flight Simulator Software, Developed in C++
 a a continuation to the AER4420 Course in my Final year of aerospace engineering atCcairo University>
 during the course i was tasked to create an autopilot system for the Lockheed Martin's C5A Aircraft using Matlab/Simulink, this is C++ implementation for the same linearized aircraft dynamics around a certain flight condition with the same controllers.
-[Linkedin 1/3](https://www.linkedin.com/posts/3lymn_autopilot-13-model-based-development-of-ugcPost-7483422524295442432-yo6z/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD8q71sBYWkieo0AnWkqPzl4N3JYOQFtBKU) [Linkedin 2/3](https://www.linkedin.com/posts/3lymn_autopilot-23-%F0%9D%9F%AD%F0%9D%9F%AE%F0%9D%98%85-%F0%9D%97%A7%F0%9D%97%B5%F0%9D%97%B2-%F0%9D%97%A3%F0%9D%97%B2%F0%9D%97%BF%F0%9D%97%B3%F0%9D%97%BC%F0%9D%97%BF%F0%9D%97%BA%F0%9D%97%AE%F0%9D%97%BB%F0%9D%97%B0%F0%9D%97%B2-ugcPost-7484514915890663424-gycB/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD8q71sBYWkieo0AnWkqPzl4N3JYOQFtBKU)
-[Linkedin 3/3](https://www.linkedin.com/posts/3lymn_autopilot-33-sooo-this-is-the-final-share-7488380808546938880-Xzcs/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAD8q71sBYWkieo0AnWkqPzl4N3JYOQFtBKU)
 
-
-![Release 1.41](https://github.com/alyayman921/Docs-Flight-Sim/blob/22f7b473e203b28654dda597e06792ed1c77be67/V1.41/Release1.41.gif)
+# X-Plane Integration
+![Release 2.1](https://github.com/alyayman921/Docs-Flight-Sim/blob/775b3e35f3b7c48ca51d98b43c5e0665f2c7b1cb/V2.1/lapseX4Bitrate5K.gif)
 
 
 # Features
@@ -26,14 +24,14 @@ during the course i was tasked to create an autopilot system for the Lockheed Ma
 
 ## Build From Source
 *Dependencies:*
-%%
-- [XLSX I/O C library](https://github.com/brechtsanders/xlsxio).
-- C++ Eigen, most likely preinstalled in your distro, can be downloaded and put in the project directory, but you'll have to do some manual renaming in the header files.
-%%
-- [Libserial](https://github.com/crayzeewulf/libserial), Self Explanatory, not available for windows.
+<!-- - [XLSX I/O C library](https://github.com/brechtsanders/xlsxio). -->
+<!-- - C++ Eigen, most likely preinstalled in your distro, can be downloaded and put in the project directory, but you'll have to do some manual renaming in the header files. -->
+<!-- - [Libserial](https://github.com/crayzeewulf/libserial), Self Explanatory, not available for windows. -->
+No Dependencies!, Unless you want Serial communication or you want to use your own aircraft.
 ## **Windows Guide**
+[Download Latest Release](https://github.com/alyayman921/Cpp-Flight-Simulator/releases)
+
 Serial Library is not for windows
-[Download Latest Release](https://github.com/alyayman921/Cpp-Flight-Simulator/releases/download/V-1.6/Release_Windows_x64.zip)
 
 it is critical to run this from a terminal in windows, do this in the terminal
 ```powershell
@@ -42,7 +40,7 @@ it is critical to run this from a terminal in windows, do this in the terminal
 
 
 ## **Linux Guide:**
-[Download Latest Release](https://github.com/alyayman921/Cpp-Flight-Simulator/releases/download/V-1.6/Release_Linux_x64.zip)
+[Download Latest Release](https://github.com/alyayman921/Cpp-Flight-Simulator/releases)
 
 **The release binaries are compiled with gcc-9 to ensure compatibility, follow this guide for best performance.**
 

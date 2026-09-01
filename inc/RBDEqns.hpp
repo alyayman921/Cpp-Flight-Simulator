@@ -9,11 +9,11 @@ and solves one time step for it, start by calling the constructor and then using
 #include "structs.h"
 #include "matrix.h"
 
-//float eps = 0.00000011921; // matlab float eps
-const float eps = 0.000000000000000222044605;
+const float eps = 0.00000011921; // matlab float eps
 extern float dt;
 extern int step;
-
+extern float rad2deg;
+extern float deg2rad;
 class RBDSolve{
     private:
         int i;
@@ -36,9 +36,14 @@ class RBDSolve{
         struct Matrix F_b;
         struct Matrix F_g0;
         struct Matrix M_total;
+        struct Matrix position;
+        struct Matrix temp;
+        struct Matrix R; // Inertial to Earth NED
     public:
         RBDSolve(aircraft_data &ac, struct Matrix* Controls,flight_path *str_h ,struct Matrix* states);
         ~RBDSolve();
+        void ItoENED();
         void rk4Solver();
         void RBDEquations(struct Matrix y, struct Matrix* out);
+        void long_lat();
 };
