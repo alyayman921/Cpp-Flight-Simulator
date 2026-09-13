@@ -3,8 +3,10 @@ a a continuation to the AER4420 Course in my Final year of aerospace engineering
 during the course i was tasked to create an autopilot system for the Lockheed Martin's C5A Aircraft using Matlab/Simulink, this is C++ implementation for the same linearized aircraft dynamics around a certain flight condition with the same controllers.
 
 # X-Plane Integration
-![Release 2.1](https://github.com/alyayman921/Docs-Flight-Sim/blob/775b3e35f3b7c48ca51d98b43c5e0665f2c7b1cb/V2.1/lapseX4Bitrate5K.gif)
 
+<p align="center">
+  <img src="https://github.com/alyayman921/Docs-Flight-Sim/blob/775b3e35f3b7c48ca51d98b43c5e0665f2c7b1cb/V2.1/lapseX4Bitrate5K.gif" alt="X-Plane Demo" width="720" />
+</p>
 
 # Features
 - Rigid Body Dynamics simulator with RK4 solver
@@ -17,7 +19,7 @@ during the course i was tasked to create an autopilot system for the Lockheed Ma
 ---
 
 <p align="center">
-  <img src="https://github.com/alyayman921/Docs-Flight-Sim/blob/22f7b473e203b28654dda597e06792ed1c77be67/V2/gfx.gif" alt="Speed Demo V2" />
+  <img src="https://github.com/alyayman921/Docs-Flight-Sim/blob/22f7b473e203b28654dda597e06792ed1c77be67/V2/gfx.gif" alt="Speed Demo V2" width="720" />
 </p>
 
 ---
@@ -80,7 +82,7 @@ if a state is to be derived (multiplied by s), for the first time step we set th
 - [x] Make a Generalized Transfer Function class.
 - [x] Deploy controllers to an stm32 based embedded board.
 - [x] Remove Libeigen and xlsxio
-- [ ] Attach a rendering GUI for the Simulator.
+- [x] Attach a rendering GUI for the Simulator.
 - [ ] Publish to AUR
 
 > [!NOTE]
