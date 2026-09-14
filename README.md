@@ -66,13 +66,13 @@ echo "Now Run it with 'FlightSimulator --help' to Get started, if you don't see 
 
 #### **Small 1ms Timesteps C++ vs Matlab**
 
-![Cpp vs Matlab at 0.001](Documentation/V0.1/CppVsMatlab150@ts0.001.png)
+![Cpp vs Matlab at 0.001](https://github.com/alyayman921/Docs-Flight-Sim/blob/775b3e35f3b7c48ca51d98b43c5e0665f2c7b1cb/V0.1/CppVsMatlab150@ts0.001.png)
 
 ---
 
 #### **Bigger  10ms Timesteps C++ vs Matlab**
 
-![Cpp vs Matlab at 0.001](Documentation/V0.1/CppVsMatlab150@ts0.01.png)
+![Cpp vs Matlab at 0.001](https://github.com/alyayman921/Docs-Flight-Sim/blob/775b3e35f3b7c48ca51d98b43c5e0665f2c7b1cb/V0.1/CppVsMatlab150@ts0.01.png)
 
 ## Controller Implementation Time Scheme
 - This is a pseudo-Continuous Time project, using same controllers from the S domain like this:
