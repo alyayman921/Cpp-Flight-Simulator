@@ -90,7 +90,7 @@ RBDSolve::~RBDSolve(){
     mat_free_memory(&delta_y); mat_free_memory(&F_aero); mat_free_memory(&F_grav);
     mat_free_memory(&F_b); mat_free_memory(&F_g0); mat_free_memory(&M_total);mat_free_memory(&temp);
 }
-void RBDSolve::ItoENED(){
+void RBDSolve::ItoENED(){ // Rotation Matrix
     R.data[0][0] =  std::cos(euler.data[1][0]) * std::cos(euler.data[2][0]);
     R.data[0][1] =  std::sin(euler.data[0][0]) * std::sin(euler.data[1][0]) * std::cos(euler.data[2][0])
                   - std::cos(euler.data[0][0]) * std::sin(euler.data[2][0]);

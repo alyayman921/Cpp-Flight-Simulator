@@ -57,6 +57,8 @@ int main(int argc, char* argv[]) {
             }
             if (arg == "--dt") {
               dt=atof(argv[i+1]);
+              if(dt<0.00000001)dt=-dt;
+              printf("dt is negative, flipping it's sign\n");
             }
             if (arg == "--tf") {
               tfinal=atof(argv[i+1]);
@@ -87,7 +89,7 @@ int main(int argc, char* argv[]) {
                 commands.ext_controller = true;
             }
             if (arg == "--xp") {
-                std::cout<<"X Plane 12 Mode";
+                std::cout<<"X Plane 12 Mode"<< '\n';
                 xplane=true;
             }
         }
